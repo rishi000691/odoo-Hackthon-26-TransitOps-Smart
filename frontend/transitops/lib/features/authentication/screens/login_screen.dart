@@ -19,7 +19,6 @@ const _kTextPrimary = Color(0xFFF8FAFC);
 const _kTextSecondary = Color(0xFF94A3B8);
 const _kBorder = Color(0xFF1E293B);
 
-// ─── Feature bullets shown on the web branding panel ─────────────────────────
 const _kFeatures = [
   (Icons.local_shipping_rounded, 'Real-time fleet tracking & dispatch'),
   (Icons.bar_chart_rounded, 'Cost analytics & ROI dashboards'),
@@ -53,14 +52,19 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void initState() {
     super.initState();
-    _anim = AnimationController(vsync: this, duration: const Duration(milliseconds: 650));
+    _anim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 650),
+    );
     _fade = CurvedAnimation(parent: _anim, curve: Curves.easeOut);
     _slide = Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
         .animate(CurvedAnimation(parent: _anim, curve: Curves.easeOut));
     _anim.forward();
 
-    _emailFocus.addListener(() => setState(() => _emailFocused = _emailFocus.hasFocus));
-    _passFocus.addListener(() => setState(() => _passFocused = _passFocus.hasFocus));
+    _emailFocus.addListener(
+        () => setState(() => _emailFocused = _emailFocus.hasFocus));
+    _passFocus.addListener(
+        () => setState(() => _passFocused = _passFocus.hasFocus));
   }
 
   @override
@@ -92,7 +96,6 @@ class _LoginScreenState extends State<LoginScreen>
     });
   }
 
-  // ─── Root ──────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,14 +106,18 @@ class _LoginScreenState extends State<LoginScreen>
           if (state is AuthFailureState) _showError(ctx, state.message);
         },
         builder: (ctx, state) {
-          final loading = state is AuthLoading;
           return FadeTransition(
             opacity: _fade,
             child: SlideTransition(
               position: _slide,
               child: context.isDesktop
-                  ? _WebLayout(screen: this, loading: loading)
-                  : _MobileLayout(screen: this, loading: loading),
+                  ? Row(
+                      children: [
+                        Expanded(flex: 42, child: buildBrandingPanel()),
+                        Expanded(flex: 58, child: buildFormPanel(isWeb: true)),
+                      ],
+                    )
+                  : SafeArea(child: buildFormPanel(isWeb: false)),
             ),
           );
         },
@@ -118,7 +125,6 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  // ─── Branding panel (web left side) ────────────────────────────────────────
   Widget buildBrandingPanel() {
     return Container(
       decoration: const BoxDecoration(
@@ -130,18 +136,21 @@ class _LoginScreenState extends State<LoginScreen>
       ),
       child: Stack(
         children: [
-          // Decorative blobs
-          Positioned(top: -80, left: -80,
-              child: _blob(320, const Color(0xFF6366F1), 0.10)),
-          Positioned(bottom: -60, right: -60,
-              child: _blob(260, const Color(0xFF818CF8), 0.08)),
-          // Content
+          Positioned(
+            top: -80,
+            left: -80,
+            child: _blob(320, const Color(0xFF6366F1), 0.10),
+          ),
+          Positioned(
+            bottom: -60,
+            right: -60,
+            child: _blob(260, const Color(0xFF818CF8), 0.08),
+          ),
           Padding(
             padding: const EdgeInsets.all(56),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Logo mark
                 Container(
                   width: 56,
                   height: 56,
@@ -151,56 +160,70 @@ class _LoginScreenState extends State<LoginScreen>
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                          color: _kAccent.withValues(alpha: 0.4),
-                          blurRadius: 20,
-                          offset: const Offset(0, 6))
+                        color: _kAccent.withValues(alpha: 0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 6),
+                      ),
                     ],
                   ),
                   child: const Icon(Icons.local_shipping_rounded,
                       color: Colors.white, size: 28),
                 ),
                 const SizedBox(height: 24),
-                Text('TransitOps',
-                    style: GoogleFonts.outfit(
-                        color: _kTextPrimary,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5)),
+                Text(
+                  'TransitOps',
+                  style: GoogleFonts.outfit(
+                    color: _kTextPrimary,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
                 const SizedBox(height: 10),
                 Text(
-                    'The all-in-one fleet operations platform\nfor modern logistics teams.',
-                    style: GoogleFonts.outfit(
-                        color: _kTextSecondary, fontSize: 15, height: 1.6)),
+                  'The all-in-one fleet operations platform\nfor modern logistics teams.',
+                  style: GoogleFonts.outfit(
+                    color: _kTextSecondary,
+                    fontSize: 15,
+                    height: 1.6,
+                  ),
+                ),
                 const Spacer(),
-                // Feature list
-                ...(_kFeatures.map((f) => Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: _kAccent.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(10),
+                ..._kFeatures.map(
+                  (f) => Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: _kAccent.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(f.$1, color: _kAccentLight, size: 18),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Text(
+                            f.$2,
+                            style: GoogleFonts.outfit(
+                              color: _kTextPrimary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
                             ),
-                            child: Icon(f.$1, color: _kAccentLight, size: 18),
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Text(f.$2,
-                                style: GoogleFonts.outfit(
-                                    color: _kTextPrimary,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500)),
-                          ),
-                        ],
-                      ),
-                    ))),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 const Spacer(),
-                Text('© 2026 TransitOps Smart. All rights reserved.',
-                    style: GoogleFonts.outfit(
-                        color: _kTextSecondary, fontSize: 12)),
+                Text(
+                  '© 2026 TransitOps Smart. All rights reserved.',
+                  style: GoogleFonts.outfit(
+                      color: _kTextSecondary, fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -209,14 +232,15 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  // ─── Form panel (shared) ────────────────────────────────────────────────────
-  Widget buildFormPanel({bool isWeb = false}) {
+  Widget buildFormPanel({required bool isWeb}) {
     return Center(
       child: SingleChildScrollView(
         padding: EdgeInsets.symmetric(
-            horizontal: isWeb ? 56 : 24, vertical: 40),
+          horizontal: isWeb ? 56 : 24,
+          vertical: 40,
+        ),
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: isWeb ? 420 : 500),
+          constraints: const BoxConstraints(maxWidth: 420),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -236,7 +260,6 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  // ─── Mobile header (shown only on small screens) ───────────────────────────
   Widget _mobileHeader() {
     return Column(
       children: [
@@ -244,33 +267,39 @@ class _LoginScreenState extends State<LoginScreen>
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [_kAccent, _kAccentLight]),
+            gradient: const LinearGradient(
+                colors: [_kAccent, _kAccentLight]),
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                  color: _kAccent.withValues(alpha: 0.4),
-                  blurRadius: 20,
-                  offset: const Offset(0, 6))
+                color: _kAccent.withValues(alpha: 0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
             ],
           ),
           child: const Icon(Icons.local_shipping_rounded,
               color: Colors.white, size: 30),
         ),
         const SizedBox(height: 18),
-        Text('TransitOps',
-            style: GoogleFonts.outfit(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: _kTextPrimary,
-                letterSpacing: -0.5)),
+        Text(
+          'TransitOps',
+          style: GoogleFonts.outfit(
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            color: _kTextPrimary,
+            letterSpacing: -0.5,
+          ),
+        ),
         const SizedBox(height: 6),
-        Text('Sign in to your fleet portal',
-            style: GoogleFonts.outfit(fontSize: 14, color: _kTextSecondary)),
+        Text(
+          'Sign in to your fleet portal',
+          style: GoogleFonts.outfit(fontSize: 14, color: _kTextSecondary),
+        ),
       ],
     );
   }
 
-  // ─── Login form card ────────────────────────────────────────────────────────
   Widget _loginCard() {
     return Builder(builder: (ctx) {
       final state = ctx.watch<AuthBloc>().state;
@@ -283,9 +312,10 @@ class _LoginScreenState extends State<LoginScreen>
           border: Border.all(color: _kBorder),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 32,
-                offset: const Offset(0, 8))
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 32,
+              offset: const Offset(0, 8),
+            ),
           ],
         ),
         child: Form(
@@ -293,76 +323,92 @@ class _LoginScreenState extends State<LoginScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Welcome back',
-                  style: GoogleFonts.outfit(
-                      color: _kTextPrimary,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700)),
+              Text(
+                'Welcome back',
+                style: GoogleFonts.outfit(
+                  color: _kTextPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text('Enter your credentials to continue',
-                  style: GoogleFonts.outfit(
-                      fontSize: 13, color: _kTextSecondary)),
+              Text(
+                'Enter your credentials to continue',
+                style: GoogleFonts.outfit(
+                  fontSize: 13,
+                  color: _kTextSecondary,
+                ),
+              ),
               const SizedBox(height: 26),
               _label('Email address'),
               const SizedBox(height: 8),
               _field(
-                  ctrl: _emailCtrl,
-                  focus: _emailFocus,
-                  focused: _emailFocused,
-                  hint: 'you@company.com',
-                  icon: Icons.mail_outline_rounded,
-                  type: TextInputType.emailAddress,
-                  enabled: !loading,
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Email is required';
-                    if (!v.contains('@')) return 'Enter a valid email';
-                    return null;
-                  }),
+                ctrl: _emailCtrl,
+                focus: _emailFocus,
+                focused: _emailFocused,
+                hint: 'you@company.com',
+                icon: Icons.mail_outline_rounded,
+                type: TextInputType.emailAddress,
+                enabled: !loading,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Email is required';
+                  if (!v.contains('@')) return 'Enter a valid email';
+                  return null;
+                },
+              ),
               const SizedBox(height: 18),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _label('Password'),
                   TextButton(
-                      onPressed: () {},
-                      style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                      child: Text('Forgot password?',
-                          style: GoogleFonts.outfit(
-                              fontSize: 12,
-                              color: _kAccentLight,
-                              fontWeight: FontWeight.w500))),
+                    onPressed: () {},
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      'Forgot password?',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: _kAccentLight,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
               _field(
-                  ctrl: _passCtrl,
-                  focus: _passFocus,
-                  focused: _passFocused,
-                  hint: '••••••••',
-                  icon: Icons.lock_outline_rounded,
-                  obscure: _obscurePass,
-                  enabled: !loading,
-                  suffix: IconButton(
-                    icon: Icon(
-                        _obscurePass
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        size: 18,
-                        color: _kTextSecondary),
-                    onPressed: () =>
-                        setState(() => _obscurePass = !_obscurePass),
+                ctrl: _passCtrl,
+                focus: _passFocus,
+                focused: _passFocused,
+                hint: '••••••••',
+                icon: Icons.lock_outline_rounded,
+                obscure: _obscurePass,
+                enabled: !loading,
+                suffix: IconButton(
+                  icon: Icon(
+                    _obscurePass
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    size: 18,
+                    color: _kTextSecondary,
                   ),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Password is required';
-                    return null;
-                  }),
+                  onPressed: () =>
+                      setState(() => _obscurePass = !_obscurePass),
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Password is required';
+                  return null;
+                },
+              ),
               const SizedBox(height: 28),
               _primaryBtn(
-                  label: 'Sign in',
-                  loading: loading,
-                  onTap: loading ? null : _submit),
+                label: 'Sign in',
+                loading: loading,
+                onTap: loading ? null : _submit,
+              ),
             ],
           ),
         ),
@@ -373,28 +419,38 @@ class _LoginScreenState extends State<LoginScreen>
   Widget _registerPrompt() => Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Don't have an account?  ",
-              style: GoogleFonts.outfit(fontSize: 13, color: _kTextSecondary)),
+          Text(
+            "Don't have an account?  ",
+            style: GoogleFonts.outfit(fontSize: 13, color: _kTextSecondary),
+          ),
           GestureDetector(
             onTap: () => context.go(AppRouter.registerPath),
-            child: Text('Create one',
-                style: GoogleFonts.outfit(
-                    fontSize: 13,
-                    color: _kAccentLight,
-                    fontWeight: FontWeight.w600)),
+            child: Text(
+              'Create one',
+              style: GoogleFonts.outfit(
+                fontSize: 13,
+                color: _kAccentLight,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       );
 
-  Widget _divider() => Row(children: [
-        const Expanded(child: Divider(color: _kBorder, thickness: 1)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text('Quick demo',
-              style: GoogleFonts.outfit(fontSize: 12, color: _kTextSecondary)),
-        ),
-        const Expanded(child: Divider(color: _kBorder, thickness: 1)),
-      ]);
+  Widget _divider() => Row(
+        children: [
+          const Expanded(child: Divider(color: _kBorder, thickness: 1)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              'Quick demo',
+              style: GoogleFonts.outfit(
+                  fontSize: 12, color: _kTextSecondary),
+            ),
+          ),
+          const Expanded(child: Divider(color: _kBorder, thickness: 1)),
+        ],
+      );
 
   Widget _quickPanel() {
     final roles = [
@@ -412,20 +468,27 @@ class _LoginScreenState extends State<LoginScreen>
       physics: const NeverScrollableScrollPhysics(),
       itemCount: roles.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 2.4),
+        crossAxisCount: 2,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        childAspectRatio: 2.4,
+      ),
       itemBuilder: (_, i) => _QuickTile(
-          role: roles[i],
-          onTap: () => _quickLogin(roles[i].email)),
+        role: roles[i],
+        onTap: () => _quickLogin(roles[i].email),
+      ),
     );
   }
 
   // ─── Shared primitives ──────────────────────────────────────────────────────
-  Widget _label(String t) => Text(t,
-      style: GoogleFonts.outfit(
-          fontSize: 13, fontWeight: FontWeight.w600, color: _kTextPrimary));
+  Widget _label(String t) => Text(
+        t,
+        style: GoogleFonts.outfit(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: _kTextPrimary,
+        ),
+      );
 
   Widget _field({
     required TextEditingController ctrl,
@@ -454,8 +517,11 @@ class _LoginScreenState extends State<LoginScreen>
         filled: true,
         prefixIcon: Padding(
           padding: const EdgeInsets.only(left: 14, right: 10),
-          child: Icon(icon, size: 18,
-              color: focused ? _kAccentLight : _kTextSecondary),
+          child: Icon(
+            icon,
+            size: 18,
+            color: focused ? _kAccentLight : _kTextSecondary,
+          ),
         ),
         prefixIconConstraints:
             const BoxConstraints(minWidth: 0, minHeight: 0),
@@ -464,19 +530,24 @@ class _LoginScreenState extends State<LoginScreen>
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(
-                color: focused ? _kAccent : _kBorder,
-                width: focused ? 2 : 1)),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: focused ? _kAccent : _kBorder,
+            width: focused ? 2 : 1,
+          ),
+        ),
         focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _kAccent, width: 2)),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _kAccent, width: 2),
+        ),
         errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _kError, width: 1)),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _kError, width: 1),
+        ),
         focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _kError, width: 2)),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _kError, width: 2),
+        ),
       ),
     );
   }
@@ -491,16 +562,18 @@ class _LoginScreenState extends State<LoginScreen>
       height: 48,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-            colors: [_kAccent, _kAccentLight],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight),
+          colors: [_kAccent, _kAccentLight],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(10),
         boxShadow: onTap != null
             ? [
                 BoxShadow(
-                    color: _kAccent.withValues(alpha: 0.38),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4))
+                  color: _kAccent.withValues(alpha: 0.38),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
               ]
             : [],
       ),
@@ -515,13 +588,19 @@ class _LoginScreenState extends State<LoginScreen>
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
-                : Text(label,
+                      strokeWidth: 2.5,
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    label,
                     style: GoogleFonts.outfit(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white)),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ),
@@ -529,47 +608,24 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   void _showError(BuildContext ctx, String msg) {
-    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-      content: Row(children: [
-        const Icon(Icons.error_outline, color: Colors.white, size: 18),
-        const SizedBox(width: 10),
-        Expanded(
-            child: Text(msg, style: GoogleFonts.outfit(fontSize: 13))),
-      ]),
-      backgroundColor: _kError,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      margin: const EdgeInsets.all(16),
-    ));
-  }
-}
-
-// ─── Web split-panel layout ───────────────────────────────────────────────────
-class _WebLayout extends StatelessWidget {
-  final _LoginScreenState screen;
-  final bool loading;
-  const _WebLayout({required this.screen, required this.loading});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      // Left branding panel — 42% width
-      Expanded(flex: 42, child: screen.buildBrandingPanel()),
-      // Right form panel — 58% width
-      Expanded(flex: 58, child: screen.buildFormPanel(isWeb: true)),
-    ]);
-  }
-}
-
-// ─── Mobile / Tablet stacked layout ──────────────────────────────────────────
-class _MobileLayout extends StatelessWidget {
-  final _LoginScreenState screen;
-  final bool loading;
-  const _MobileLayout({required this.screen, required this.loading});
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(child: screen.buildFormPanel(isWeb: false));
+    ScaffoldMessenger.of(ctx).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white, size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(msg, style: GoogleFonts.outfit(fontSize: 13)),
+            ),
+          ],
+        ),
+        backgroundColor: _kError,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 }
 
@@ -609,31 +665,38 @@ class _QuickTileState extends State<_QuickTile> {
                 : _kSurface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: _hover
-                    ? widget.role.color.withValues(alpha: 0.45)
-                    : _kBorder),
+              color: _hover
+                  ? widget.role.color.withValues(alpha: 0.45)
+                  : _kBorder,
+            ),
           ),
-          child: Row(children: [
-            Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
+          child: Row(
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
                   color: widget.role.color.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(8)),
-              child:
-                  Icon(widget.role.icon, color: widget.role.color, size: 15),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(widget.role.label,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(widget.role.icon,
+                    color: widget.role.color, size: 15),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  widget.role.label,
                   style: GoogleFonts.outfit(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: _kTextPrimary),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: _kTextPrimary,
+                  ),
                   maxLines: 2,
-                  overflow: TextOverflow.ellipsis),
-            ),
-          ]),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -644,6 +707,7 @@ Widget _blob(double size, Color color, double opacity) => Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color.withValues(alpha: opacity)),
+        shape: BoxShape.circle,
+        color: color.withValues(alpha: opacity),
+      ),
     );

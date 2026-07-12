@@ -32,7 +32,7 @@ class AppRouter {
     redirect: (context, state) async {
       final authRepo = locator<AuthRepository>();
       final loggedIn = await authRepo.isLoggedIn();
-      
+
       final goingToLogin = state.matchedLocation == loginPath;
       final goingToRegister = state.matchedLocation == registerPath;
 
@@ -47,7 +47,7 @@ class AppRouter {
           return dashboardPath;
         }
       }
-      
+
       return null;
     },
   );
