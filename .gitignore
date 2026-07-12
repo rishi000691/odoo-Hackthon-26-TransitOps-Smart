@@ -1,6 +1,7 @@
 .context/
 node_modules/
-.env
+
 dist/
 *.log
 frontend/transitops/Hari.md
+.env
