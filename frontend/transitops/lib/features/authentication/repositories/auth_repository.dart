@@ -42,14 +42,18 @@ class AuthRepository {
   Future<User> login(String email, String password) async {
     // 1. Try matching mock users first for smooth prototyping/testing
     final mockUserIndex = _mockUsers.indexWhere(
-      (u) => u['email'].toString().toLowerCase() == email.trim().toLowerCase() && u['password'] == password,
+      (u) =>
+          u['email'].toString().toLowerCase() == email.trim().toLowerCase() &&
+          u['password'] == password,
     );
 
     if (mockUserIndex != -1) {
       final userJson = _mockUsers[mockUserIndex];
       final user = User.fromJson(userJson);
 
-      await apiClient.secureStorage.saveAccessToken('mock-jwt-token-${user.id}');
+      await apiClient.secureStorage.saveAccessToken(
+        'mock-jwt-token-${user.id}',
+      );
       await apiClient.secureStorage.saveUserData(jsonEncode(userJson));
 
       return user;

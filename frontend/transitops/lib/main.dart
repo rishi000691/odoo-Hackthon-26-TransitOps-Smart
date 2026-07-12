@@ -31,14 +31,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AuthBloc>(
-      create: (context) => AuthBloc(
-        authRepository: locator<AuthRepository>(),
-      )..add(AuthCheckRequested()),
+      create: (context) =>
+          AuthBloc(authRepository: locator<AuthRepository>())
+            ..add(AuthCheckRequested()),
       child: MaterialApp.router(
         title: 'TransitOps',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system, // Automatically matches platform light/dark modes
+        themeMode:
+            ThemeMode.system, // Automatically matches platform light/dark modes
         routerConfig: AppRouter.router,
         debugShowCheckedModeBanner: false,
       ),
