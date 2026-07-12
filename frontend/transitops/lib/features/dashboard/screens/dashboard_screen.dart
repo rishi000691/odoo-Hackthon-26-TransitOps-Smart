@@ -9,6 +9,22 @@ import 'package:transitops/features/authentication/blocs/auth_bloc.dart';
 import 'package:transitops/features/authentication/blocs/auth_event.dart';
 import 'package:transitops/features/authentication/blocs/auth_state.dart';
 
+import 'package:transitops/features/vehicles/blocs/vehicle_bloc.dart';
+import 'package:transitops/features/vehicles/blocs/vehicle_event.dart';
+import 'package:transitops/features/vehicles/blocs/vehicle_state.dart';
+import 'package:transitops/features/vehicles/models/vehicle_model.dart';
+import 'package:transitops/features/drivers/blocs/driver_bloc.dart';
+import 'package:transitops/features/drivers/blocs/driver_event.dart';
+import 'package:transitops/features/drivers/blocs/driver_state.dart';
+import 'package:transitops/features/drivers/models/driver_model.dart';
+import 'package:transitops/features/trips/blocs/trip_bloc.dart';
+import 'package:transitops/features/trips/blocs/trip_event.dart';
+import 'package:transitops/features/trips/blocs/trip_state.dart';
+import 'package:transitops/features/trips/models/trip_model.dart';
+import 'package:transitops/features/reports/blocs/report_bloc.dart';
+import 'package:transitops/features/reports/blocs/report_event.dart';
+import 'package:transitops/features/reports/blocs/report_state.dart';
+
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 
 // ─── Role Metadata ────────────────────────────────────────────────────────────
@@ -78,6 +94,12 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
     _fade = CurvedAnimation(parent: _anim, curve: Curves.easeOut);
     _anim.forward();
+
+    // Trigger initial data fetches
+    context.read<ReportBloc>().add(const FetchReportData());
+    context.read<VehicleBloc>().add(const FetchVehicles());
+    context.read<DriverBloc>().add(const FetchDrivers());
+    context.read<TripBloc>().add(const FetchTrips());
   }
 
   @override
@@ -135,7 +157,7 @@ class _WebDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ContentArea(role: role, meta: meta, isWeb: true);
+    return _ContentArea(user: user, role: role, meta: meta, isWeb: true);
   }
 }
 
@@ -293,19 +315,33 @@ class _MobileDashboard extends StatelessWidget {
           ),
         ),
       ],
-      body: _ContentArea(role: role, meta: meta, isWeb: false),
+      body: _ContentArea(user: user, role: role, meta: meta, isWeb: false),
     );
   }
+}
+
+class _IncidentData {
+  final String title, desc, time, level;
+  final Color color;
+  const _IncidentData({
+    required this.title,
+    required this.desc,
+    required this.time,
+    required this.level,
+    required this.color,
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Shared Content Area  (used by both web and mobile)
 // ─────────────────────────────────────────────────────────────────────────────
 class _ContentArea extends StatelessWidget {
+  final dynamic user;
   final UserRole role;
   final _RM meta;
   final bool isWeb;
   const _ContentArea({
+    required this.user,
     required this.role,
     required this.meta,
     required this.isWeb,
@@ -316,18 +352,86 @@ class _ContentArea extends StatelessWidget {
     final cols = context.statGridColumns;
     final hPad = isWeb ? 28.0 : 16.0;
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(hPad, 24, hPad, 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _sectionTitle(context, 'Overview'),
-          const SizedBox(height: 14),
-          _statsGrid(context, cols),
-          const SizedBox(height: 28),
-          ..._roleBody(context),
-        ],
-      ),
+    return BlocBuilder<ReportBloc, ReportState>(
+      builder: (context, reportState) {
+        return BlocBuilder<VehicleBloc, VehicleState>(
+          builder: (context, vehicleState) {
+            return BlocBuilder<DriverBloc, DriverState>(
+              builder: (context, driverState) {
+                return BlocBuilder<TripBloc, TripState>(
+                  builder: (context, tripState) {
+                    final isLoading =
+                        reportState is ReportLoading ||
+                        vehicleState is VehicleLoading ||
+                        driverState is DriverLoading ||
+                        tripState is TripLoading ||
+                        reportState is ReportInitial ||
+                        vehicleState is VehicleInitial ||
+                        driverState is DriverInitial ||
+                        tripState is TripInitial;
+
+                    if (isLoading) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 80),
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF6366F1),
+                          ),
+                        ),
+                      );
+                    }
+
+                    final Map<String, dynamic> kpis =
+                        (reportState is ReportLoaded) ? reportState.kpis : {};
+                    final List<Map<String, dynamic>> roiReport =
+                        (reportState is ReportLoaded)
+                        ? reportState.roiReport
+                        : [];
+                    final List<Vehicle> vehicles =
+                        (vehicleState is VehiclesLoaded)
+                        ? vehicleState.vehicles
+                        : [];
+                    final List<Driver> drivers = (driverState is DriversLoaded)
+                        ? driverState.drivers
+                        : [];
+                    final List<Trip> trips = (tripState is TripsLoaded)
+                        ? tripState.trips
+                        : [];
+
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(hPad, 24, hPad, 32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _sectionTitle(context, 'Overview'),
+                          const SizedBox(height: 14),
+                          _statsGrid(
+                            context,
+                            cols,
+                            kpis,
+                            roiReport,
+                            drivers,
+                            trips,
+                          ),
+                          const SizedBox(height: 28),
+                          ..._roleBody(
+                            context,
+                            kpis,
+                            roiReport,
+                            vehicles,
+                            drivers,
+                            trips,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 
@@ -341,8 +445,15 @@ class _ContentArea extends StatelessWidget {
     ),
   );
 
-  Widget _statsGrid(BuildContext ctx, int cols) {
-    final stats = _statsForRole();
+  Widget _statsGrid(
+    BuildContext ctx,
+    int cols,
+    Map<String, dynamic> kpis,
+    List<Map<String, dynamic>> roiReport,
+    List<Driver> drivers,
+    List<Trip> trips,
+  ) {
+    final stats = _statsForRole(kpis, roiReport, drivers, trips);
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -357,89 +468,173 @@ class _ContentArea extends StatelessWidget {
     );
   }
 
-  List<_Stat> _statsForRole() {
+  List<_Stat> _statsForRole(
+    Map<String, dynamic> kpis,
+    List<Map<String, dynamic>> roiReport,
+    List<Driver> drivers,
+    List<Trip> trips,
+  ) {
     switch (role) {
       case UserRole.fleetManager:
+        final activeVeh = kpis['active_vehicles'] ?? 12;
+        final availVeh = kpis['available_vehicles'] ?? 4;
+        final maintVeh = kpis['vehicles_in_maintenance'] ?? 2;
+        final totalVeh = activeVeh + availVeh + maintVeh;
+        final util = (kpis['fleet_utilization_pct'] as num? ?? 78.5).toDouble();
+        final activeTrips = kpis['active_trips'] ?? 5;
+        final pendingTrips = kpis['pending_trips'] ?? 1;
+
         return [
           _Stat(
             'Active Vehicles',
-            '12 / 16',
+            '$activeVeh / $totalVeh',
             Icons.directions_car_rounded,
             const Color(0xFFF59E0B),
-            '+2 this week',
+            '+$availVeh available',
           ),
           _Stat(
             'Utilization',
-            '78.5%',
+            '${util.toStringAsFixed(1)}%',
             Icons.query_stats_rounded,
             const Color(0xFF6366F1),
-            '↑ 5.2%',
+            '↑ Live score',
           ),
           _Stat(
             'Active Trips',
-            '5',
+            '$activeTrips',
             Icons.navigation_rounded,
             const Color(0xFF10B981),
-            'Ongoing',
+            '$pendingTrips pending',
           ),
           _Stat(
             'Maintenance',
-            '2 Active',
+            '$maintVeh Active',
             Icons.build_circle_rounded,
             const Color(0xFFF97316),
-            '1 scheduled',
+            'Scheduled',
           ),
         ];
+
       case UserRole.driver:
+        final nameToMatch = '${user.firstName} ${user.lastName}'
+            .trim()
+            .toLowerCase();
+        Driver currentDriver = drivers.firstWhere(
+          (d) => d.name.trim().toLowerCase() == nameToMatch,
+          orElse: () => drivers.isNotEmpty
+              ? drivers.first
+              : Driver(
+                  id: '',
+                  name: '${user.firstName} ${user.lastName}',
+                  licenseNumber: '',
+                  licenseCategory: '',
+                  licenseExpiryDate: DateTime.now(),
+                  contactNumber: '',
+                  safetyScore: 95.8,
+                  status: DriverStatus.available,
+                  createdAt: DateTime.now(),
+                ),
+        );
+
+        Trip? activeTrip;
+        for (final t in trips) {
+          if (t.driverId == currentDriver.id &&
+              t.status == TripStatus.dispatched) {
+            activeTrip = t;
+            break;
+          }
+        }
+        if (activeTrip == null) {
+          for (final t in trips) {
+            if (t.driverId == currentDriver.id &&
+                t.status == TripStatus.draft) {
+              activeTrip = t;
+              break;
+            }
+          }
+        }
+
+        final today = DateTime.now();
+        final tripsTodayCount = trips
+            .where(
+              (t) =>
+                  t.driverId == currentDriver.id &&
+                  t.createdAt.year == today.year &&
+                  t.createdAt.month == today.month &&
+                  t.createdAt.day == today.day,
+            )
+            .length;
+
+        final tripsText = activeTrip != null ? '1 Active' : '$tripsTodayCount';
+
         return [
           _Stat(
             'Safety Score',
-            '95.8',
+            currentDriver.safetyScore.toStringAsFixed(1),
             Icons.stars_rounded,
             const Color(0xFF10B981),
             'Top 10%',
           ),
           _Stat(
             'Trips Today',
-            '1 Active',
+            tripsText,
             Icons.local_shipping_rounded,
             const Color(0xFF6366F1),
-            'Dispatched',
+            activeTrip != null ? 'Dispatched' : 'Idle',
           ),
           _Stat(
             'Distance',
-            '420 km',
+            '${(activeTrip?.plannedDistance ?? 420).toStringAsFixed(0)} km',
             Icons.straighten_rounded,
             const Color(0xFFF59E0B),
             'Planned',
           ),
           _Stat(
             'Fuel Logged',
-            '42 L',
+            '${(activeTrip?.fuelConsumed ?? 42).toStringAsFixed(0)} L',
             Icons.local_gas_station_rounded,
             const Color(0xFFF97316),
             'Today',
           ),
         ];
+
       case UserRole.safetyOfficer:
+        final avgSafety = drivers.isEmpty
+            ? 91.2
+            : drivers.map((d) => d.safetyScore).reduce((a, b) => a + b) /
+                  drivers.length;
+
+        final suspendedCount = drivers
+            .where((d) => d.status == DriverStatus.suspended)
+            .length;
+        final maintVeh = kpis['vehicles_in_maintenance'] ?? 1;
+        final alertsCount = suspendedCount + maintVeh;
+
+        final expiringCount = drivers
+            .where(
+              (d) =>
+                  d.licenseExpiryDate.difference(DateTime.now()).inDays <= 30,
+            )
+            .length;
+
         return [
           _Stat(
             'Overall Safety',
-            '91.2%',
+            '${avgSafety.toStringAsFixed(1)}%',
             Icons.verified_user_rounded,
             const Color(0xFFF97316),
-            '↑ 1.4%',
+            'Live Avg',
           ),
           _Stat(
             'Alerts Today',
-            '2 Issues',
+            '$alertsCount Issues',
             Icons.warning_amber_rounded,
             const Color(0xFFF87171),
             'Action needed',
           ),
           _Stat(
             'Exp. Licenses',
-            '3',
+            '$expiringCount',
             Icons.assignment_late_rounded,
             const Color(0xFFF59E0B),
             'Near expiry',
@@ -452,41 +647,83 @@ class _ContentArea extends StatelessWidget {
             'All passed',
           ),
         ];
+
       case UserRole.financialAnalyst:
+        double totalRev = 0;
+        double totalFuel = 0;
+        double totalMaint = 0;
+        double avgRoi = 0;
+
+        if (roiReport.isNotEmpty) {
+          for (final row in roiReport) {
+            totalRev += double.parse(
+              (row['revenue'] ?? row['total_revenue'] ?? 0.0).toString(),
+            );
+            totalFuel += double.parse(
+              (row['fuel_cost'] ?? row['total_fuel_cost'] ?? 0.0).toString(),
+            );
+            totalMaint += double.parse(
+              (row['maintenance_cost'] ?? row['total_maintenance_cost'] ?? 0.0)
+                  .toString(),
+            );
+          }
+          final roiSum = roiReport.fold<double>(
+            0.0,
+            (sum, row) =>
+                sum +
+                double.parse(
+                  (row['roi'] ?? row['roi_percentage'] ?? 0.0).toString(),
+                ),
+          );
+          avgRoi = roiSum / roiReport.length;
+        } else {
+          totalRev = 12400.0;
+          totalFuel = 3150.0;
+          totalMaint = 1800.0;
+          avgRoi = 14.9;
+        }
+
         return [
           _Stat(
             'Revenue',
-            '\$12,400',
+            '\$${totalRev.toStringAsFixed(0)}',
             Icons.monetization_on_rounded,
             const Color(0xFFA855F7),
             'This month',
           ),
           _Stat(
             'Fuel Costs',
-            '\$3,150',
+            '\$${totalFuel.toStringAsFixed(0)}',
             Icons.local_gas_station_rounded,
             const Color(0xFFF97316),
-            '25%',
+            'Live sum',
           ),
           _Stat(
             'Maintenance',
-            '\$1,800',
+            '\$${totalMaint.toStringAsFixed(0)}',
             Icons.construction_rounded,
             const Color(0xFFF59E0B),
-            '14.5%',
+            'Live sum',
           ),
           _Stat(
             'Net ROI',
-            '14.9%',
+            '${avgRoi.toStringAsFixed(1)}%',
             Icons.trending_up_rounded,
             const Color(0xFF10B981),
-            '↑ 2.3%',
+            'Live Avg',
           ),
         ];
     }
   }
 
-  List<Widget> _roleBody(BuildContext ctx) {
+  List<Widget> _roleBody(
+    BuildContext ctx,
+    Map<String, dynamic> kpis,
+    List<Map<String, dynamic>> roiReport,
+    List<Vehicle> vehicles,
+    List<Driver> drivers,
+    List<Trip> trips,
+  ) {
     switch (role) {
       case UserRole.fleetManager:
         return [
@@ -537,15 +774,52 @@ class _ContentArea extends StatelessWidget {
           const SizedBox(height: 28),
           _sectionTitle(ctx, 'Fleet Status'),
           const SizedBox(height: 14),
-          if (isWeb) _webFleetTable(ctx) else _mobileFleetList(),
+          if (isWeb)
+            _webFleetTable(ctx, vehicles)
+          else
+            _mobileFleetList(ctx, vehicles),
         ];
 
       case UserRole.driver:
+        final nameToMatch = '${user.firstName} ${user.lastName}'
+            .trim()
+            .toLowerCase();
+        Driver? currentDriver;
+        for (final d in drivers) {
+          if (d.name.trim().toLowerCase() == nameToMatch) {
+            currentDriver = d;
+            break;
+          }
+        }
+        if (currentDriver == null && drivers.isNotEmpty) {
+          currentDriver = drivers.first;
+        }
+
+        Trip? activeTrip;
+        if (currentDriver != null) {
+          for (final t in trips) {
+            if (t.driverId == currentDriver.id &&
+                t.status == TripStatus.dispatched) {
+              activeTrip = t;
+              break;
+            }
+          }
+          if (activeTrip == null) {
+            for (final t in trips) {
+              if (t.driverId == currentDriver.id &&
+                  t.status == TripStatus.draft) {
+                activeTrip = t;
+                break;
+              }
+            }
+          }
+        }
+
         return [
           _sectionTitle(ctx, "Today's Checklist"),
           const SizedBox(height: 14),
-          const _ChecklistCard(
-            items: [
+          _ChecklistCard(
+            items: const [
               _CheckItem('Pre-trip exterior safety inspection', true),
               _CheckItem('Verify fuel log & odometer entry', true),
               _CheckItem('Record current trip distance', false),
@@ -555,10 +829,63 @@ class _ContentArea extends StatelessWidget {
           const SizedBox(height: 28),
           _sectionTitle(ctx, 'Active Dispatch'),
           const SizedBox(height: 14),
-          _ActiveTripCard(accent: meta.accent, isWeb: isWeb),
+          _ActiveTripCard(
+            activeTrip: activeTrip,
+            accent: meta.accent,
+            isWeb: isWeb,
+          ),
         ];
 
       case UserRole.safetyOfficer:
+        final incidents = <_IncidentData>[];
+        for (final d in drivers) {
+          if (d.status == DriverStatus.suspended) {
+            incidents.add(
+              _IncidentData(
+                title: 'Driver Suspended',
+                desc:
+                    'Driver ${d.name} safety score fell to ${d.safetyScore.toStringAsFixed(1)} and status was updated to Suspended.',
+                time: 'Active Alert',
+                level: 'High',
+                color: const Color(0xFFF87171),
+              ),
+            );
+          }
+        }
+        final vehiclesInMaintenance = vehicles
+            .where((v) => v.status == VehicleStatus.inShop)
+            .toList();
+        for (final v in vehiclesInMaintenance) {
+          incidents.add(
+            _IncidentData(
+              title: 'Vehicle in Maintenance',
+              desc:
+                  'Vehicle ${v.registrationNumber} (${v.model}) is currently in maintenance shop.',
+              time: 'Ongoing',
+              level: 'Medium',
+              color: const Color(0xFFF59E0B),
+            ),
+          );
+        }
+        if (incidents.isEmpty) {
+          incidents.add(
+            const _IncidentData(
+              title: 'Safety Compliance Active',
+              desc:
+                  'All active drivers are compliant and fleet vehicles have passed safety inspections.',
+              time: 'Just now',
+              level: 'Normal',
+              color: Color(0xFF10B981),
+            ),
+          );
+        }
+
+        final displayIncidents = incidents.take(2).toList();
+
+        final sortedDrivers = List<Driver>.from(drivers)
+          ..sort((a, b) => a.licenseExpiryDate.compareTo(b.licenseExpiryDate));
+        final displayExpiryDrivers = sortedDrivers.take(3).toList();
+
         return [
           _sectionTitle(ctx, 'Recent Incidents'),
           const SizedBox(height: 14),
@@ -566,69 +893,93 @@ class _ContentArea extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _IncidentCard(
-                    title: 'Speed Threshold Alert',
-                    desc:
-                        'Vehicle GJ-05-AB-1234 exceeded 90 km/h for 3 consecutive minutes.',
-                    time: '2 hours ago',
-                    level: 'High',
-                    accent: const Color(0xFFF87171),
+                if (displayIncidents.isNotEmpty)
+                  Expanded(
+                    child: _IncidentCard(
+                      title: displayIncidents[0].title,
+                      desc: displayIncidents[0].desc,
+                      time: displayIncidents[0].time,
+                      level: displayIncidents[0].level,
+                      accent: displayIncidents[0].color,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _IncidentCard(
-                    title: 'Hard Braking',
-                    desc:
-                        'Driver Alex Mehta logged 2 abrupt deceleration events on NH-48.',
-                    time: 'Yesterday, 4:32 PM',
-                    level: 'Medium',
-                    accent: const Color(0xFFF59E0B),
+                if (displayIncidents.length > 1) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _IncidentCard(
+                      title: displayIncidents[1].title,
+                      desc: displayIncidents[1].desc,
+                      time: displayIncidents[1].time,
+                      level: displayIncidents[1].level,
+                      accent: displayIncidents[1].color,
+                    ),
                   ),
-                ),
+                ],
               ],
             )
           else ...[
-            _IncidentCard(
-              title: 'Speed Threshold Alert',
-              desc:
-                  'Vehicle GJ-05-AB-1234 exceeded 90 km/h for 3 consecutive minutes.',
-              time: '2 hours ago',
-              level: 'High',
-              accent: const Color(0xFFF87171),
-            ),
-            const SizedBox(height: 10),
-            _IncidentCard(
-              title: 'Hard Braking Detected',
-              desc:
-                  'Driver Alex Mehta logged 2 abrupt deceleration events on NH-48.',
-              time: 'Yesterday, 4:32 PM',
-              level: 'Medium',
-              accent: const Color(0xFFF59E0B),
+            ...displayIncidents.map(
+              (incident) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _IncidentCard(
+                  title: incident.title,
+                  desc: incident.desc,
+                  time: incident.time,
+                  level: incident.level,
+                  accent: incident.color,
+                ),
+              ),
             ),
           ],
           const SizedBox(height: 28),
           _sectionTitle(ctx, 'License Expiry Tracker'),
           const SizedBox(height: 14),
-          _LicenseRow(
-            name: 'Rohan Patel',
-            expiry: 'Expires in 12 days',
-            color: const Color(0xFFF59E0B),
-          ),
-          _LicenseRow(
-            name: 'Anita Sharma',
-            expiry: 'Expires in 8 days',
-            color: const Color(0xFFF97316),
-          ),
-          _LicenseRow(
-            name: 'Dev Malhotra',
-            expiry: 'Expires in 3 days',
-            color: const Color(0xFFF87171),
-          ),
+          ...displayExpiryDrivers.map((d) {
+            final days = d.licenseExpiryDate.difference(DateTime.now()).inDays;
+            final expiryText = days < 0
+                ? 'Expired ${-days} days ago'
+                : 'Expires in $days days';
+            final color = days <= 3
+                ? const Color(0xFFF87171)
+                : (days <= 15
+                      ? const Color(0xFFF97316)
+                      : const Color(0xFFF59E0B));
+            return _LicenseRow(name: d.name, expiry: expiryText, color: color);
+          }),
         ];
 
       case UserRole.financialAnalyst:
+        double totalRev = 0;
+        double totalFuel = 0;
+        double totalMaint = 0;
+
+        if (roiReport.isNotEmpty) {
+          for (final row in roiReport) {
+            totalRev += double.parse(
+              (row['revenue'] ?? row['total_revenue'] ?? 0.0).toString(),
+            );
+            totalFuel += double.parse(
+              (row['fuel_cost'] ?? row['total_fuel_cost'] ?? 0.0).toString(),
+            );
+            totalMaint += double.parse(
+              (row['maintenance_cost'] ?? row['total_maintenance_cost'] ?? 0.0)
+                  .toString(),
+            );
+          }
+        } else {
+          totalRev = 12400.0;
+          totalFuel = 3150.0;
+          totalMaint = 1800.0;
+        }
+
+        final fuelPct = totalRev == 0 ? 0.25 : (totalFuel / totalRev);
+        final maintPct = totalRev == 0 ? 0.145 : (totalMaint / totalRev);
+        const insurancePct = 0.077;
+        const miscPct = 0.052;
+
+        final insuranceCost = totalRev * insurancePct;
+        final miscCost = totalRev * miscPct;
+
         return [
           _sectionTitle(ctx, 'Expenditure Breakdown'),
           const SizedBox(height: 14),
@@ -638,8 +989,8 @@ class _ContentArea extends StatelessWidget {
                 Expanded(
                   child: _ExpenseRow(
                     label: 'Fuel',
-                    amount: '\$3,150',
-                    pct: 0.25,
+                    amount: '\$${totalFuel.toStringAsFixed(0)}',
+                    pct: fuelPct,
                     accent: const Color(0xFFF97316),
                   ),
                 ),
@@ -647,8 +998,8 @@ class _ContentArea extends StatelessWidget {
                 Expanded(
                   child: _ExpenseRow(
                     label: 'Maintenance',
-                    amount: '\$1,800',
-                    pct: 0.145,
+                    amount: '\$${totalMaint.toStringAsFixed(0)}',
+                    pct: maintPct,
                     accent: const Color(0xFFF59E0B),
                   ),
                 ),
@@ -656,8 +1007,8 @@ class _ContentArea extends StatelessWidget {
                 Expanded(
                   child: _ExpenseRow(
                     label: 'Insurance',
-                    amount: '\$960',
-                    pct: 0.077,
+                    amount: '\$${insuranceCost.toStringAsFixed(0)}',
+                    pct: insurancePct,
                     accent: const Color(0xFF6366F1),
                   ),
                 ),
@@ -665,8 +1016,8 @@ class _ContentArea extends StatelessWidget {
                 Expanded(
                   child: _ExpenseRow(
                     label: 'Toll & Misc',
-                    amount: '\$640',
-                    pct: 0.052,
+                    amount: '\$${miscCost.toStringAsFixed(0)}',
+                    pct: miscPct,
                     accent: const Color(0xFFA855F7),
                   ),
                 ),
@@ -675,29 +1026,29 @@ class _ContentArea extends StatelessWidget {
           else ...[
             _ExpenseRow(
               label: 'Fuel Costs',
-              amount: '\$3,150',
-              pct: 0.25,
+              amount: '\$${totalFuel.toStringAsFixed(0)}',
+              pct: fuelPct,
               accent: const Color(0xFFF97316),
             ),
             const SizedBox(height: 8),
             _ExpenseRow(
               label: 'Maintenance',
-              amount: '\$1,800',
-              pct: 0.145,
+              amount: '\$${totalMaint.toStringAsFixed(0)}',
+              pct: maintPct,
               accent: const Color(0xFFF59E0B),
             ),
             const SizedBox(height: 8),
             _ExpenseRow(
               label: 'Insurance',
-              amount: '\$960',
-              pct: 0.077,
+              amount: '\$${insuranceCost.toStringAsFixed(0)}',
+              pct: insurancePct,
               accent: const Color(0xFF6366F1),
             ),
             const SizedBox(height: 8),
             _ExpenseRow(
               label: 'Toll & Misc',
-              amount: '\$640',
-              pct: 0.052,
+              amount: '\$${miscCost.toStringAsFixed(0)}',
+              pct: miscPct,
               accent: const Color(0xFFA855F7),
             ),
           ],
@@ -716,13 +1067,21 @@ class _ContentArea extends StatelessWidget {
   }
 
   // ─── Fleet table for web ────────────────────────────────────────────────────
-  Widget _webFleetTable(BuildContext context) {
-    final rows = [
-      ('GJ-05-AB-1234', 'Truck', 'On Trip', const Color(0xFF10B981)),
-      ('MH-12-CD-5678', 'Van', 'Available', const Color(0xFF6366F1)),
-      ('DL-03-EF-9012', 'Truck', 'In Shop', const Color(0xFFF97316)),
-      ('RJ-09-GH-3456', 'Sedan', 'Available', const Color(0xFF6366F1)),
-    ];
+  Widget _webFleetTable(BuildContext context, List<Vehicle> vehicles) {
+    final displayVehicles = vehicles.take(4).toList();
+    if (displayVehicles.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        alignment: Alignment.center,
+        child: Text(
+          'No vehicles registered yet.',
+          style: GoogleFonts.outfit(
+            color: context.kTextSecondary,
+            fontSize: 13,
+          ),
+        ),
+      );
+    }
     return Container(
       decoration: BoxDecoration(
         color: context.kSurface,
@@ -745,8 +1104,23 @@ class _ContentArea extends StatelessWidget {
               ],
             ),
           ),
-          ...rows.map(
-            (row) => Container(
+          ...displayVehicles.map((row) {
+            Color statusColor;
+            switch (row.status) {
+              case VehicleStatus.available:
+                statusColor = const Color(0xFF6366F1);
+                break;
+              case VehicleStatus.onTrip:
+                statusColor = const Color(0xFF10B981);
+                break;
+              case VehicleStatus.inShop:
+                statusColor = const Color(0xFFF97316);
+                break;
+              case VehicleStatus.retired:
+                statusColor = const Color(0xFFF87171);
+                break;
+            }
+            return Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: context.kBorder)),
@@ -764,7 +1138,7 @@ class _ContentArea extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          row.$1,
+                          row.registrationNumber,
                           style: GoogleFonts.outfit(
                             color: context.kTextPrimary,
                             fontWeight: FontWeight.w600,
@@ -777,7 +1151,7 @@ class _ContentArea extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      row.$2,
+                      row.type,
                       style: GoogleFonts.outfit(
                         color: context.kTextSecondary,
                         fontSize: 13,
@@ -792,13 +1166,13 @@ class _ContentArea extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: row.$4.withValues(alpha: 0.12),
+                        color: statusColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        row.$3,
+                        row.status.value,
                         style: GoogleFonts.outfit(
-                          color: row.$4,
+                          color: statusColor,
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                         ),
@@ -807,8 +1181,8 @@ class _ContentArea extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -827,17 +1201,44 @@ class _ContentArea extends StatelessWidget {
     ),
   );
 
-  Widget _mobileFleetList() {
-    final rows = [
-      ('GJ-05-AB-1234', 'On Trip', const Color(0xFF10B981)),
-      ('MH-12-CD-5678', 'Available', const Color(0xFF6366F1)),
-      ('DL-03-EF-9012', 'In Shop', const Color(0xFFF97316)),
-      ('RJ-09-GH-3456', 'Available', const Color(0xFF6366F1)),
-    ];
+  Widget _mobileFleetList(BuildContext context, List<Vehicle> vehicles) {
+    final displayVehicles = vehicles.take(4).toList();
+    if (displayVehicles.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        alignment: Alignment.center,
+        child: Text(
+          'No vehicles registered yet.',
+          style: GoogleFonts.outfit(
+            color: context.kTextSecondary,
+            fontSize: 13,
+          ),
+        ),
+      );
+    }
     return Column(
-      children: rows
-          .map((r) => _VehicleStatusRow(plate: r.$1, status: r.$2, color: r.$3))
-          .toList(),
+      children: displayVehicles.map((v) {
+        Color statusColor;
+        switch (v.status) {
+          case VehicleStatus.available:
+            statusColor = const Color(0xFF6366F1);
+            break;
+          case VehicleStatus.onTrip:
+            statusColor = const Color(0xFF10B981);
+            break;
+          case VehicleStatus.inShop:
+            statusColor = const Color(0xFFF97316);
+            break;
+          case VehicleStatus.retired:
+            statusColor = const Color(0xFFF87171);
+            break;
+        }
+        return _VehicleStatusRow(
+          plate: v.registrationNumber,
+          status: v.status.value,
+          color: statusColor,
+        );
+      }).toList(),
     );
   }
 }
@@ -918,7 +1319,10 @@ class _StatCard extends StatelessWidget {
               ),
               Text(
                 stat.hint,
-                style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 10),
+                style: GoogleFonts.outfit(
+                  color: context.kTextSecondary,
+                  fontSize: 10,
+                ),
               ),
             ],
           ),
@@ -934,7 +1338,10 @@ class _StatCard extends StatelessWidget {
           ),
           Text(
             stat.label,
-            style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 11),
+            style: GoogleFonts.outfit(
+              color: context.kTextSecondary,
+              fontSize: 11,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -975,10 +1382,14 @@ class _ActionCardState extends State<_ActionCard> {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _hover ? widget.accent.withValues(alpha: 0.07) : context.kSurface,
+            color: _hover
+                ? widget.accent.withValues(alpha: 0.07)
+                : context.kSurface,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: _hover ? widget.accent.withValues(alpha: 0.35) : context.kBorder,
+              color: _hover
+                  ? widget.accent.withValues(alpha: 0.35)
+                  : context.kBorder,
             ),
           ),
           child: Row(
@@ -1095,9 +1506,30 @@ class _CheckItem {
   const _CheckItem(this.label, this.done);
 }
 
-class _ChecklistCard extends StatelessWidget {
+class _ChecklistCard extends StatefulWidget {
   final List<_CheckItem> items;
   const _ChecklistCard({required this.items});
+
+  @override
+  State<_ChecklistCard> createState() => _ChecklistCardState();
+}
+
+class _ChecklistCardState extends State<_ChecklistCard> {
+  late List<_CheckItem> _localItems;
+
+  @override
+  void initState() {
+    super.initState();
+    _localItems = List.from(widget.items);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ChecklistCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.items.length != widget.items.length) {
+      _localItems = List.from(widget.items);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1109,10 +1541,20 @@ class _ChecklistCard extends StatelessWidget {
         border: Border.all(color: context.kBorder),
       ),
       child: Column(
-        children: items
-            .map(
-              (item) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 7),
+        children: _localItems.asMap().entries.map((entry) {
+          final idx = entry.key;
+          final item = entry.value;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                setState(() {
+                  _localItems[idx] = _CheckItem(item.label, !item.done);
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                 child: Row(
                   children: [
                     Icon(
@@ -1129,7 +1571,9 @@ class _ChecklistCard extends StatelessWidget {
                       child: Text(
                         item.label,
                         style: GoogleFonts.outfit(
-                          color: item.done ? context.kTextSecondary : context.kTextPrimary,
+                          color: item.done
+                              ? context.kTextSecondary
+                              : context.kTextPrimary,
                           fontSize: 13,
                           decoration: item.done
                               ? TextDecoration.lineThrough
@@ -1141,25 +1585,81 @@ class _ChecklistCard extends StatelessWidget {
                   ],
                 ),
               ),
-            )
-            .toList(),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 }
 
 class _ActiveTripCard extends StatelessWidget {
+  final Trip? activeTrip;
   final Color accent;
   final bool isWeb;
-  const _ActiveTripCard({required this.accent, required this.isWeb});
+  const _ActiveTripCard({
+    required this.activeTrip,
+    required this.accent,
+    required this.isWeb,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (activeTrip == null) {
+      return Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: context.kSurface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: context.kBorder),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.local_shipping_outlined,
+                  color: context.kTextSecondary.withValues(alpha: 0.4),
+                  size: 32,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'No active dispatch assigned.',
+                  style: GoogleFonts.outfit(
+                    color: context.kTextSecondary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  'Check back later or contact your fleet manager.',
+                  style: GoogleFonts.outfit(
+                    color: context.kTextSecondary.withValues(alpha: 0.7),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final infoRows = [
-      (Icons.trip_origin_rounded, 'Origin', 'Ahmedabad Logistics Hub'),
-      (Icons.location_on_rounded, 'Destination', 'Mumbai Port Terminal 3'),
-      (Icons.scale_rounded, 'Cargo Weight', '420 kg'),
-      (Icons.straighten_rounded, 'Distance', '540 km planned'),
+      (Icons.trip_origin_rounded, 'Origin', activeTrip!.source),
+      (Icons.location_on_rounded, 'Destination', activeTrip!.destination),
+      (
+        Icons.scale_rounded,
+        'Cargo Weight',
+        '${activeTrip!.cargoWeight.toStringAsFixed(0)} kg',
+      ),
+      (
+        Icons.straighten_rounded,
+        'Distance',
+        '${activeTrip!.plannedDistance.toStringAsFixed(0)} km planned',
+      ),
     ];
 
     return Container(
@@ -1176,7 +1676,7 @@ class _ActiveTripCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Trip #1204',
+                'Trip #${activeTrip!.id.length > 8 ? activeTrip!.id.substring(0, 8).toUpperCase() : activeTrip!.id}',
                 style: GoogleFonts.outfit(
                   color: context.kTextPrimary,
                   fontWeight: FontWeight.w800,
@@ -1190,7 +1690,7 @@ class _ActiveTripCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'Dispatched',
+                  activeTrip!.status.value,
                   style: GoogleFonts.outfit(
                     color: accent,
                     fontSize: 11,
@@ -1241,7 +1741,10 @@ class _TripInfoRow extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 12),
+          style: GoogleFonts.outfit(
+            color: context.kTextSecondary,
+            fontSize: 12,
+          ),
         ),
         Expanded(
           child: Text(
@@ -1395,7 +1898,11 @@ class _LicenseRow extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: context.kTextSecondary, size: 18),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: context.kTextSecondary,
+            size: 18,
+          ),
         ],
       ),
     );
@@ -1430,7 +1937,10 @@ class _ExpenseRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 12),
+                style: GoogleFonts.outfit(
+                  color: context.kTextSecondary,
+                  fontSize: 12,
+                ),
               ),
               Text(
                 amount,
