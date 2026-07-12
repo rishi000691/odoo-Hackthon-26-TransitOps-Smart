@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:transitops/core/constants/enums.dart';
 import 'package:transitops/core/extensions/context_extension.dart';
 import 'package:transitops/core/routes/app_router.dart';
+import 'package:transitops/core/theme/app_theme.dart';
 import 'package:transitops/features/authentication/blocs/auth_bloc.dart';
 import 'package:transitops/features/authentication/blocs/auth_event.dart';
 import 'package:transitops/features/authentication/blocs/auth_state.dart';
@@ -544,6 +545,31 @@ class _WebTopBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
+          // Theme Toggle
+          IconButton(
+            icon: ValueListenableBuilder<ThemeMode>(
+              valueListenable: AppTheme.themeModeNotifier,
+              builder: (context, mode, _) {
+                final isDark = mode == ThemeMode.dark ||
+                    (mode == ThemeMode.system &&
+                        MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+                return Icon(
+                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                  color: _kTextSecondary,
+                  size: 20,
+                );
+              },
+            ),
+            onPressed: () {
+              final mode = AppTheme.themeModeNotifier.value;
+              final isDark = mode == ThemeMode.dark ||
+                  (mode == ThemeMode.system &&
+                      MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+              AppTheme.themeModeNotifier.value =
+                  isDark ? ThemeMode.light : ThemeMode.dark;
+            },
+          ),
+          const SizedBox(width: 12),
           // Notification placeholder
           Container(
             width: 36,

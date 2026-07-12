@@ -103,4 +103,20 @@ class DriverRepository {
       throw ApiClient.handleDioException(e);
     }
   }
+
+  Future<String> sendExpiryReminders(int days) async {
+    try {
+      final response = await apiClient.dio.post(
+        '/drivers/reminders/send',
+        data: {'days': days},
+      );
+      final apiResponse = ApiResponse<dynamic>.fromJson(
+        response.data as Map<String, dynamic>,
+        (data) => data,
+      );
+      return apiResponse.message ?? 'Reminders processed successfully';
+    } on DioException catch (e) {
+      throw ApiClient.handleDioException(e);
+    }
+  }
 }

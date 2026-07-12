@@ -5,6 +5,9 @@ import 'app_text_theme.dart';
 class AppTheme {
   AppTheme._();
 
+  static final ValueNotifier<ThemeMode> themeModeNotifier =
+      ValueNotifier<ThemeMode>(ThemeMode.system);
+
   static ThemeData get lightTheme {
     final colorScheme = ColorScheme.light(
       primary: AppColors.primary,

@@ -75,14 +75,18 @@ class MyApp extends StatelessWidget {
               ReportBloc(reportRepository: locator<ReportRepository>()),
         ),
       ],
-      child: MaterialApp.router(
-        title: 'TransitOps',
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode:
-            ThemeMode.system, // Automatically matches platform light/dark modes
-        routerConfig: AppRouter.router,
-        debugShowCheckedModeBanner: false,
+      child: ValueListenableBuilder<ThemeMode>(
+        valueListenable: AppTheme.themeModeNotifier,
+        builder: (context, currentMode, _) {
+          return MaterialApp.router(
+            title: 'TransitOps',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: currentMode,
+            routerConfig: AppRouter.router,
+            debugShowCheckedModeBanner: false,
+          );
+        },
       ),
     );
   }

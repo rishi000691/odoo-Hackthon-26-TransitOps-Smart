@@ -43,3 +43,8 @@ class UpdateDriver extends DriverEvent {
 
   const UpdateDriver({required this.id, required this.fields});
 }
+
+class SendExpiryReminders extends DriverEvent {
+  final int days;
+  const SendExpiryReminders({this.days = 30});
+}

@@ -47,10 +47,21 @@ async function deleteDriver(req, res) {
   });
 }
 
+async function sendExpiryReminders(req, res) {
+  const days = req.body.days ? parseInt(req.body.days, 10) : 30;
+  const result = await driverService.sendExpiryReminders(days);
+  return res.status(200).json({
+    success: true,
+    data: camelToSnake(result),
+    message: `Expiry reminder emails processed. Sent ${result.length} reminders.`
+  });
+}
+
 module.exports = {
   getDrivers: asyncHandler(getDrivers),
   getDriverById: asyncHandler(getDriverById),
   createDriver: asyncHandler(createDriver),
   updateDriver: asyncHandler(updateDriver),
-  deleteDriver: asyncHandler(deleteDriver)
+  deleteDriver: asyncHandler(deleteDriver),
+  sendExpiryReminders: asyncHandler(sendExpiryReminders)
 };

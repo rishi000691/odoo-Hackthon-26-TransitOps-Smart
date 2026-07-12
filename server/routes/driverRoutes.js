@@ -11,6 +11,9 @@ router.use(authenticateJWT);
 router.get('/', driverController.getDrivers);
 router.get('/:id', driverController.getDriverById);
 
+// Expiry Reminders
+router.post('/reminders/send', authorizeRoles('Fleet Manager', 'Safety Officer'), driverController.sendExpiryReminders);
+
 // Fleet Manager and Safety Officer can manage drivers
 router.post('/', authorizeRoles('Fleet Manager', 'Safety Officer'), validate(driverCreateSchema), driverController.createDriver);
 router.put('/:id', authorizeRoles('Fleet Manager', 'Safety Officer'), validate(driverUpdateSchema), driverController.updateDriver);

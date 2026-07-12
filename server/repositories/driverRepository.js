@@ -56,11 +56,26 @@ async function destroy(id) {
   });
 }
 
+async function findExpiringDrivers(days = 30) {
+  const targetDate = new Date();
+  targetDate.setDate(targetDate.getDate() + days);
+  
+  return prisma.driver.findMany({
+    where: {
+      licenseExpiryDate: {
+        gte: new Date(),
+        lte: targetDate
+      }
+    }
+  });
+}
+
 module.exports = {
   findMany,
   findById,
   findByLicenseNumber,
   create,
   update,
-  destroy
+  destroy,
+  findExpiringDrivers
 };

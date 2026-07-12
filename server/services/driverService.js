@@ -51,10 +51,42 @@ async function deleteDriver(id) {
   }
 }
 
+async function sendExpiryReminders(days = 30) {
+  const expiringDrivers = await driverRepository.findExpiringDrivers(days);
+  const remindersSent = [];
+
+  for (const driver of expiringDrivers) {
+    const formattedExpiryDate = driver.licenseExpiryDate.toISOString().split('T')[0];
+    
+    // Simulate sending email
+    console.log(`\n======================================================`);
+    console.log(`[EMAIL SENT] TO: ${driver.name.toLowerCase().replace(/\s+/g, '')}@transitops-fleet.com`);
+    console.log(`SUBJECT: URGENT: Driver License Renewal Reminder`);
+    console.log(`BODY:`);
+    console.log(`Dear ${driver.name},`);
+    console.log(`This is an automated reminder that your driver license (${driver.licenseNumber}) is set to expire on ${formattedExpiryDate}.`);
+    console.log(`Please renew your license before this date to maintain active status.`);
+    console.log(`Best regards,`);
+    console.log(`TransitOps Safety & Compliance Team`);
+    console.log(`======================================================\n`);
+
+    remindersSent.push({
+      driverId: driver.id,
+      driverName: driver.name,
+      licenseNumber: driver.licenseNumber,
+      expiryDate: formattedExpiryDate,
+      email: `${driver.name.toLowerCase().replace(/\s+/g, '')}@transitops-fleet.com`
+    });
+  }
+
+  return remindersSent;
+}
+
 module.exports = {
   getDrivers,
   getDriverById,
   createDriver,
   updateDriver,
-  deleteDriver
+  deleteDriver,
+  sendExpiryReminders
 };
