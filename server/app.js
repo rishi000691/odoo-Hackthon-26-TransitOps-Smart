@@ -5,13 +5,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const { env } = require('./config/env');
 
-const authRoutes = require('./routes/authRoutes');
-const vehicleRoutes = require('./routes/vehicleRoutes');
-const driverRoutes = require('./routes/driverRoutes');
-const tripRoutes = require('./routes/tripRoutes');
-const maintenanceRoutes = require('./routes/maintenanceRoutes');
-const logRoutes = require('./routes/logRoutes');
-const reportRoutes = require('./routes/reportRoutes');
+const apiV1Router = require('./routes/api.v1');
 
 const { errorHandler, NotFoundError } = require('./middleware/errorHandler');
 
@@ -45,14 +39,9 @@ app.use(express.urlencoded({ extended: true }));
 // Swagger UI doc route
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Routes mounted under /api/v1 as defined by the specification
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/vehicles', vehicleRoutes);
-app.use('/api/v1/drivers', driverRoutes);
-app.use('/api/v1/trips', tripRoutes);
-app.use('/api/v1/maintenance', maintenanceRoutes);
-app.use('/api/v1/expenses', logRoutes);
-app.use('/api/v1/reports', reportRoutes);
+// Mount the api.v1 router hierarchy
+app.use('/api/v1', apiV1Router);
+app.use('/', apiV1Router);
 
 // Catch-all 404 handler
 app.use((req, res, next) => {

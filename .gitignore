@@ -5,3 +5,4 @@ dist/
 *.log
 frontend/transitops/Hari.md
 .env
+.DS_Store
