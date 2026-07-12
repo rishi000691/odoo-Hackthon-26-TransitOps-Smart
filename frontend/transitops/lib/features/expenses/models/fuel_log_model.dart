@@ -17,8 +17,8 @@ class FuelLog {
     return FuelLog(
       id: json['id'] as String,
       vehicleId: json['vehicle_id'] as String,
-      liters: (json['liters'] as num).toDouble(),
-      cost: (json['cost'] as num).toDouble(),
+      liters: double.parse(json['liters'].toString()),
+      cost: double.parse(json['cost'].toString()),
       date: DateTime.parse(json['date'] as String),
     );
   }

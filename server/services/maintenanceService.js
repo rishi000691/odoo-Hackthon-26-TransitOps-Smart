@@ -19,7 +19,12 @@ async function closeMaintenanceLog(id, { cost }) {
   return maintenanceRepository.close(log, cost);
 }
 
+async function getMaintenanceLogs(filters) {
+  return maintenanceRepository.findMany(filters);
+}
+
 module.exports = {
   createMaintenanceLog,
-  closeMaintenanceLog
+  closeMaintenanceLog,
+  getMaintenanceLogs
 };

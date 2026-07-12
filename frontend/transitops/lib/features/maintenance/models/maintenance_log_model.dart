@@ -24,7 +24,7 @@ class MaintenanceLog {
       id: json['id'] as String,
       vehicleId: json['vehicle_id'] as String,
       description: json['description'] as String,
-      cost: (json['cost'] as num).toDouble(),
+      cost: double.parse(json['cost'].toString()),
       startDate: DateTime.parse(json['start_date'] as String),
       endDate: json['end_date'] != null ? DateTime.parse(json['end_date'] as String) : null,
       status: MaintenanceStatus.fromString(json['status'] as String),

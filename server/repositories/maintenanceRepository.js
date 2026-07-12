@@ -56,8 +56,24 @@ async function close(log, cost) {
   });
 }
 
+async function findMany(filters = {}) {
+  const where = {};
+  if (filters.status) {
+    where.status = filters.status;
+  }
+  if (filters.vehicleId) {
+    where.vehicleId = filters.vehicleId;
+  }
+  return prisma.maintenanceLog.findMany({
+    where,
+    orderBy: { startDate: 'desc' },
+    include: { vehicle: true }
+  });
+}
+
 module.exports = {
   findById,
+  findMany,
   create,
   close
 };

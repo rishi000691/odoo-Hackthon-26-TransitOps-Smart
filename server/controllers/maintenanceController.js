@@ -20,7 +20,17 @@ async function closeMaintenanceLog(req, res) {
   });
 }
 
+async function getMaintenanceLogs(req, res) {
+  const result = await maintenanceService.getMaintenanceLogs(snakeToCamel(req.query));
+  return res.status(200).json({
+    success: true,
+    data: camelToSnake(result),
+    message: 'Maintenance logs retrieved successfully'
+  });
+}
+
 module.exports = {
   createMaintenanceLog: asyncHandler(createMaintenanceLog),
-  closeMaintenanceLog: asyncHandler(closeMaintenanceLog)
+  closeMaintenanceLog: asyncHandler(closeMaintenanceLog),
+  getMaintenanceLogs: asyncHandler(getMaintenanceLogs)
 };

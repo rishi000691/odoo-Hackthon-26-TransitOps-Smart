@@ -3,6 +3,11 @@ import 'package:go_router/go_router.dart';
 import '../../features/authentication/screens/login_screen.dart';
 import '../../features/authentication/screens/register_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
+import '../../features/vehicles/screens/vehicles_screen.dart';
+import '../../features/drivers/screens/drivers_screen.dart';
+import '../../features/trips/screens/trips_screen.dart';
+import '../../features/maintenance/screens/maintenance_screen.dart';
+import '../../features/reports/screens/reports_screen.dart';
 import '../services/service_locator.dart';
 import '../../features/authentication/repositories/auth_repository.dart';
 import '../widgets/responsive_navigation_layout.dart';
@@ -15,6 +20,9 @@ class AppRouter {
   static const String dashboardPath = '/dashboard';
   static const String vehiclesPath = '/vehicles';
   static const String driversPath = '/drivers';
+  static const String tripsPath = '/trips';
+  static const String maintenancePath = '/maintenance';
+  static const String reportsPath = '/reports';
 
   static final GoRouter router = GoRouter(
     initialLocation: loginPath,
@@ -34,6 +42,12 @@ class AppRouter {
             currentIndex = 1;
           } else if (state.uri.path.startsWith(driversPath)) {
             currentIndex = 2;
+          } else if (state.uri.path.startsWith(tripsPath)) {
+            currentIndex = 3;
+          } else if (state.uri.path.startsWith(maintenancePath)) {
+            currentIndex = 4;
+          } else if (state.uri.path.startsWith(reportsPath)) {
+            currentIndex = 5;
           }
 
           return ResponsiveNavigationLayout(
@@ -48,6 +62,15 @@ class AppRouter {
                   break;
                 case 2:
                   context.go(driversPath);
+                  break;
+                case 3:
+                  context.go(tripsPath);
+                  break;
+                case 4:
+                  context.go(maintenancePath);
+                  break;
+                case 5:
+                  context.go(reportsPath);
                   break;
               }
             },
@@ -67,6 +90,21 @@ class AppRouter {
                 selectedIcon: Icon(Icons.people),
                 label: 'Drivers',
               ),
+              NavigationItem(
+                icon: Icon(Icons.navigation_outlined),
+                selectedIcon: Icon(Icons.navigation),
+                label: 'Trips',
+              ),
+              NavigationItem(
+                icon: Icon(Icons.build_circle_outlined),
+                selectedIcon: Icon(Icons.build_circle),
+                label: 'Maintenance',
+              ),
+              NavigationItem(
+                icon: Icon(Icons.bar_chart_outlined),
+                selectedIcon: Icon(Icons.bar_chart),
+                label: 'Reports',
+              ),
             ],
             child: child,
           );
@@ -78,17 +116,23 @@ class AppRouter {
           ),
           GoRoute(
             path: vehiclesPath,
-            builder: (context, state) => Scaffold(
-              appBar: AppBar(title: const Text('Vehicles')),
-              body: const Center(child: Text('Vehicles Screen Placeholder')),
-            ),
+            builder: (context, state) => const VehiclesScreen(),
           ),
           GoRoute(
             path: driversPath,
-            builder: (context, state) => Scaffold(
-              appBar: AppBar(title: const Text('Drivers')),
-              body: const Center(child: Text('Drivers Screen Placeholder')),
-            ),
+            builder: (context, state) => const DriversScreen(),
+          ),
+          GoRoute(
+            path: tripsPath,
+            builder: (context, state) => const TripsScreen(),
+          ),
+          GoRoute(
+            path: maintenancePath,
+            builder: (context, state) => const MaintenanceScreen(),
+          ),
+          GoRoute(
+            path: reportsPath,
+            builder: (context, state) => const ReportsScreen(),
           ),
         ],
       ),

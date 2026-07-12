@@ -9,6 +9,9 @@ import 'package:transitops/features/authentication/repositories/auth_repository.
 import 'package:transitops/features/vehicles/repositories/vehicle_repository.dart';
 import 'package:transitops/features/drivers/repositories/driver_repository.dart';
 import 'package:transitops/features/trips/repositories/trip_repository.dart';
+import 'package:transitops/features/maintenance/repositories/maintenance_repository.dart';
+import 'package:transitops/features/expenses/repositories/expense_repository.dart';
+import 'package:transitops/features/reports/repositories/report_repository.dart';
 
 final GetIt locator = GetIt.instance;
 
@@ -38,5 +41,14 @@ Future<void> setupLocator() async {
   );
   locator.registerLazySingleton<TripRepository>(
     () => TripRepository(apiClient: locator<ApiClient>()),
+  );
+  locator.registerLazySingleton<MaintenanceRepository>(
+    () => MaintenanceRepository(apiClient: locator<ApiClient>()),
+  );
+  locator.registerLazySingleton<ExpenseRepository>(
+    () => ExpenseRepository(apiClient: locator<ApiClient>()),
+  );
+  locator.registerLazySingleton<ReportRepository>(
+    () => ReportRepository(apiClient: locator<ApiClient>()),
   );
 }

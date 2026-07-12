@@ -8,7 +8,8 @@ const router = express.Router();
 
 router.use(authenticateJWT);
 
-// Maintenance logs managed by Fleet Manager
+// Maintenance logs endpoints
+router.get('/', authorizeRoles('Fleet Manager', 'Driver', 'Safety Officer', 'Financial Analyst'), maintenanceController.getMaintenanceLogs);
 router.post('/', authorizeRoles('Fleet Manager'), validate(maintenanceCreateSchema), maintenanceController.createMaintenanceLog);
 
 // Supports both POST and PUT for closing maintenance logs to satisfy both PDF specifications and test suites

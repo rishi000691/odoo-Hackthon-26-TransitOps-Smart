@@ -20,7 +20,7 @@ class Expense {
       id: json['id'] as String,
       vehicleId: json['vehicle_id'] as String,
       expenseType: ExpenseType.fromString(json['expense_type'] as String),
-      cost: (json['cost'] as num).toDouble(),
+      cost: double.parse(json['cost'].toString()),
       date: DateTime.parse(json['date'] as String),
     );
   }

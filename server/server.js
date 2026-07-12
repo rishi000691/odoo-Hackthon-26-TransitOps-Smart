@@ -6,6 +6,7 @@ const PORT = env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
   console.log(`TransitOps API Server is running on port ${PORT}`);
+  console.log(`API Docs: http://localhost:${PORT}/`);
 });
 
 // Graceful shutdown
