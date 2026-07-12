@@ -11,10 +11,16 @@ router.use(authenticateJWT);
 router.get('/', tripController.getTrips);
 router.get('/:id', tripController.getTripById);
 
-// Trips managed by Driver and Fleet Manager roles
+// Trips managed by Driver and Fleet Manager roles (Supports both POST and PUT for actions to maintain compatibility across tests)
 router.post('/', authorizeRoles('Driver', 'Fleet Manager'), validate(tripCreateSchema), tripController.createTrip);
+
 router.post('/:id/dispatch', authorizeRoles('Driver', 'Fleet Manager'), tripController.dispatchTrip);
+router.put('/:id/dispatch', authorizeRoles('Driver', 'Fleet Manager'), tripController.dispatchTrip);
+
 router.post('/:id/complete', authorizeRoles('Driver', 'Fleet Manager'), validate(tripCompleteSchema), tripController.completeTrip);
+router.put('/:id/complete', authorizeRoles('Driver', 'Fleet Manager'), validate(tripCompleteSchema), tripController.completeTrip);
+
 router.post('/:id/cancel', authorizeRoles('Driver', 'Fleet Manager'), tripController.cancelTrip);
+router.put('/:id/cancel', authorizeRoles('Driver', 'Fleet Manager'), tripController.cancelTrip);
 
 module.exports = router;
