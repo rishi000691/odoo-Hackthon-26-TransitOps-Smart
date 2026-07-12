@@ -4,7 +4,7 @@ class SecureStorageService {
   final FlutterSecureStorage _storage;
 
   SecureStorageService({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   static const String _accessTokenKey = 'jwt_access_token';
   static const String _refreshTokenKey = 'jwt_refresh_token';
