@@ -63,6 +63,7 @@ class VehicleRepository {
     required double maxLoadCapacity,
     required double currentOdometer,
     required double acquisitionCost,
+    String? region,
   }) async {
     try {
       final response = await apiClient.dio.post(
@@ -74,6 +75,7 @@ class VehicleRepository {
           'max_load_capacity': maxLoadCapacity,
           'current_odometer': currentOdometer,
           'acquisition_cost': acquisitionCost,
+          if (region != null) 'region': region,
         },
       );
       final apiResponse = ApiResponse<Vehicle>.fromJson(

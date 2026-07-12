@@ -30,7 +30,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: Colors.white,
         elevation: 0,
-        shadowColor: AppColors.neutral900.withOpacity(0.08),
+        shadowColor: AppColors.neutral900.withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: AppColors.neutral100, width: 1),
@@ -73,10 +73,10 @@ class AppTheme {
       cardTheme: CardThemeData(
         elevation: 0,
         color: const Color(0xFF22404F), // glass-tint above the Nile Blue bg
-        shadowColor: Colors.black.withOpacity(0.4),
+        shadowColor: Colors.black.withValues(alpha: 0.4),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.white.withOpacity(0.08), width: 1),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.08), width: 1),
         ),
         margin: EdgeInsets.zero,
       ),

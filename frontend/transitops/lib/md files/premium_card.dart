@@ -24,18 +24,18 @@ class PremiumCard extends StatelessWidget {
     // dark mode we lighten slightly toward white; in light mode we shade
     // slightly toward black, so the effect stays subtle either way.
     final Color surfaceStart = isDark
-        ? Color.alphaBlend(Colors.white.withOpacity(0.04), colorScheme.surface)
-        : Color.alphaBlend(Colors.white.withOpacity(0.6), colorScheme.surface);
+        ? Color.alphaBlend(Colors.white.withValues(alpha: 0.04), colorScheme.surface)
+        : Color.alphaBlend(Colors.white.withValues(alpha: 0.6), colorScheme.surface);
     final Color surfaceEnd = isDark
-        ? Color.alphaBlend(Colors.black.withOpacity(0.12), colorScheme.surface)
-        : Color.alphaBlend(Colors.black.withOpacity(0.02), colorScheme.surface);
+        ? Color.alphaBlend(Colors.black.withValues(alpha: 0.12), colorScheme.surface)
+        : Color.alphaBlend(Colors.black.withValues(alpha: 0.02), colorScheme.surface);
 
     // Fine-grain border: a hair lighter than the background in dark mode,
     // a hair darker in light mode — just enough to separate the card from
     // its background without reading as a hard outline.
     final Color borderColor = isDark
-        ? Colors.white.withOpacity(0.08)
-        : colorScheme.onSurface.withOpacity(0.08);
+        ? Colors.white.withValues(alpha: 0.08)
+        : colorScheme.onSurface.withValues(alpha: 0.08);
 
     return Container(
       padding: padding,
@@ -50,7 +50,7 @@ class PremiumCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: (isDark ? Colors.black : colorScheme.shadow)
-                .withOpacity(isDark ? 0.35 : 0.06),
+                .withValues(alpha: isDark ? 0.35 : 0.06),
             blurRadius: 20,
             offset: const Offset(0, 8),
             spreadRadius: -4,

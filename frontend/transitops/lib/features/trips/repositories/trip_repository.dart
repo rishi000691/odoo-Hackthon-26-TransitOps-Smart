@@ -89,11 +89,20 @@ class TripRepository {
     }
   }
 
-  Future<Trip> completeTrip(String id, {double? actualDistance}) async {
+  Future<Trip> completeTrip(
+    String id, {
+    double? actualDistance,
+    double? fuelConsumed,
+    double? revenue,
+  }) async {
     try {
       final response = await apiClient.dio.post(
         '/trips/$id/complete',
-        data: actualDistance != null ? {'actual_distance': actualDistance} : null,
+        data: {
+          if (actualDistance != null) 'actual_distance': actualDistance,
+          if (fuelConsumed != null) 'fuel_consumed': fuelConsumed,
+          if (revenue != null) 'revenue': revenue,
+        },
       );
       final apiResponse = ApiResponse<Trip>.fromJson(
         response.data as Map<String, dynamic>,

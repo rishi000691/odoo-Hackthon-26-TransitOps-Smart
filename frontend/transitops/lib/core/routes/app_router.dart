@@ -23,6 +23,10 @@ class AppRouter {
         path: loginPath,
         builder: (context, state) => const LoginScreen(),
       ),
+      GoRoute(
+        path: registerPath,
+        builder: (context, state) => const RegisterScreen(),
+      ),
       ShellRoute(
         builder: (context, state, child) {
           int currentIndex = 0;

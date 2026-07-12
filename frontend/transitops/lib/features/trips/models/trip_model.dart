@@ -9,6 +9,8 @@ class Trip {
   final double cargoWeight;
   final double plannedDistance;
   final double? actualDistance;
+  final double? fuelConsumed;
+  final double revenue;
   final TripStatus status;
   final DateTime createdAt;
   final DateTime? completedAt;
@@ -22,6 +24,8 @@ class Trip {
     required this.cargoWeight,
     required this.plannedDistance,
     this.actualDistance,
+    this.fuelConsumed,
+    required this.revenue,
     required this.status,
     required this.createdAt,
     this.completedAt,
@@ -37,6 +41,8 @@ class Trip {
       cargoWeight: (json['cargo_weight'] as num).toDouble(),
       plannedDistance: (json['planned_distance'] as num).toDouble(),
       actualDistance: (json['actual_distance'] as num?)?.toDouble(),
+      fuelConsumed: (json['fuel_consumed'] as num?)?.toDouble(),
+      revenue: (json['revenue'] as num? ?? 0.0).toDouble(),
       status: TripStatus.fromString(json['status'] as String),
       createdAt: DateTime.parse(json['created_at'] as String),
       completedAt: json['completed_at'] != null ? DateTime.parse(json['completed_at'] as String) : null,
@@ -53,6 +59,8 @@ class Trip {
       'cargo_weight': cargoWeight,
       'planned_distance': plannedDistance,
       'actual_distance': actualDistance,
+      'fuel_consumed': fuelConsumed,
+      'revenue': revenue,
       'status': status.value,
       'created_at': createdAt.toIso8601String(),
       'completed_at': completedAt?.toIso8601String(),
@@ -61,6 +69,6 @@ class Trip {
 
   @override
   String toString() {
-    return 'Trip(id: $id, source: $source, destination: $destination, status: $status)';
+    return 'Trip(id: $id, source: $source, destination: $destination, status: $status, revenue: $revenue)';
   }
 }

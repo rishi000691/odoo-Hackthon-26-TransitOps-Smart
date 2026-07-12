@@ -86,14 +86,20 @@ class _RegisterScreenState extends State<RegisterScreen>
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   final _confirmCtrl = TextEditingController();
+  final _firstNameCtrl = TextEditingController();
+  final _lastNameCtrl = TextEditingController();
 
   final _emailFocus = FocusNode();
   final _passFocus = FocusNode();
   final _confirmFocus = FocusNode();
+  final _firstNameFocus = FocusNode();
+  final _lastNameFocus = FocusNode();
 
   bool _emailFocused = false;
   bool _passFocused = false;
   bool _confirmFocused = false;
+  bool _firstNameFocused = false;
+  bool _lastNameFocused = false;
 
   bool _obscurePass = true;
   bool _obscureConfirm = true;
@@ -112,8 +118,10 @@ class _RegisterScreenState extends State<RegisterScreen>
       duration: const Duration(milliseconds: 650),
     );
     _fade = CurvedAnimation(parent: _anim, curve: Curves.easeOut);
-    _slide = Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _anim, curve: Curves.easeOut));
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.05),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _anim, curve: Curves.easeOut));
     _anim.forward();
 
     _emailFocus.addListener(
@@ -122,6 +130,10 @@ class _RegisterScreenState extends State<RegisterScreen>
         () => setState(() => _passFocused = _passFocus.hasFocus));
     _confirmFocus.addListener(
         () => setState(() => _confirmFocused = _confirmFocus.hasFocus));
+    _firstNameFocus.addListener(
+        () => setState(() => _firstNameFocused = _firstNameFocus.hasFocus));
+    _lastNameFocus.addListener(
+        () => setState(() => _lastNameFocused = _lastNameFocus.hasFocus));
   }
 
   @override
@@ -130,19 +142,27 @@ class _RegisterScreenState extends State<RegisterScreen>
     _emailCtrl.dispose();
     _passCtrl.dispose();
     _confirmCtrl.dispose();
+    _firstNameCtrl.dispose();
+    _lastNameCtrl.dispose();
     _emailFocus.dispose();
     _passFocus.dispose();
     _confirmFocus.dispose();
+    _firstNameFocus.dispose();
+    _lastNameFocus.dispose();
     super.dispose();
   }
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      context.read<AuthBloc>().add(AuthRegisterSubmitted(
-            email: _emailCtrl.text.trim(),
-            password: _passCtrl.text,
-            role: _selectedRole,
-          ));
+      context.read<AuthBloc>().add(
+        AuthRegisterSubmitted(
+          email: _emailCtrl.text.trim(),
+          password: _passCtrl.text,
+          firstName: _firstNameCtrl.text.trim(),
+          lastName: _lastNameCtrl.text.trim(),
+          role: _selectedRole,
+        ),
+      );
     }
   }
 
@@ -211,7 +231,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           vertical: 40,
         ),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
+          constraints: const BoxConstraints(maxWidth: 460),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -376,6 +396,79 @@ class _RegisterScreenState extends State<RegisterScreen>
                   fontSize: 12, color: _kTextSecondary),
             ),
             const SizedBox(height: 24),
+            // First Name and Last Name layout (Split on desktop/tablet, stacked on mobile)
+            if (context.isDesktop)
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _label('First name'),
+                        const SizedBox(height: 8),
+                        _field(
+                          ctrl: _firstNameCtrl,
+                          focus: _firstNameFocus,
+                          focused: _firstNameFocused,
+                          hint: 'Alice',
+                          icon: Icons.person_outline_rounded,
+                          enabled: !loading,
+                          validator: (v) =>
+                              (v == null || v.isEmpty) ? 'Required' : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _label('Last name'),
+                        const SizedBox(height: 8),
+                        _field(
+                          ctrl: _lastNameCtrl,
+                          focus: _lastNameFocus,
+                          focused: _lastNameFocused,
+                          hint: 'Smith',
+                          icon: Icons.person_outline_rounded,
+                          enabled: !loading,
+                          validator: (v) =>
+                              (v == null || v.isEmpty) ? 'Required' : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            else ...[
+              _label('First name'),
+              const SizedBox(height: 8),
+              _field(
+                ctrl: _firstNameCtrl,
+                focus: _firstNameFocus,
+                focused: _firstNameFocused,
+                hint: 'Alice',
+                icon: Icons.person_outline_rounded,
+                enabled: !loading,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'First name is required' : null,
+              ),
+              const SizedBox(height: 16),
+              _label('Last name'),
+              const SizedBox(height: 8),
+              _field(
+                ctrl: _lastNameCtrl,
+                focus: _lastNameFocus,
+                focused: _lastNameFocused,
+                hint: 'Smith',
+                icon: Icons.person_outline_rounded,
+                enabled: !loading,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Last name is required' : null,
+              ),
+            ],
+            const SizedBox(height: 16),
             _label('Email address'),
             const SizedBox(height: 8),
             _field(
@@ -416,7 +509,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               ),
               validator: (v) {
                 if (v == null || v.isEmpty) return 'Password is required';
-                if (v.length < 8) return 'At least 8 characters';
+                if (v.length < 6) return 'At least 6 characters';
                 return null;
               },
             ),

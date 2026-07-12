@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:transitops/core/extensions/context_extension.dart';
 import 'package:transitops/core/routes/app_router.dart';
-import 'package:transitops/core/widgets/app_text_field.dart';
 import 'package:transitops/features/authentication/blocs/auth_bloc.dart';
 import 'package:transitops/features/authentication/blocs/auth_event.dart';
 import 'package:transitops/features/authentication/blocs/auth_state.dart';
@@ -105,8 +104,6 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       backgroundColor: _kBg,
       body: BlocConsumer<AuthBloc, AuthState>(

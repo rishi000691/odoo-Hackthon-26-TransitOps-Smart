@@ -1,5 +1,14 @@
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+const fs = require('fs');
+
+const serverEnvPath = path.join(__dirname, '../.env');
+const rootEnvPath = path.join(__dirname, '../../.env');
+
+if (fs.existsSync(serverEnvPath)) {
+  require('dotenv').config({ path: serverEnvPath });
+} else {
+  require('dotenv').config({ path: rootEnvPath });
+}
 
 const requiredEnvVars = ['JWT_SECRET', 'JWT_EXPIRES_IN', 'DATABASE_URL'];
 

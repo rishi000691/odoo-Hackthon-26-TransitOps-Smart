@@ -9,6 +9,7 @@ class Vehicle {
   final double currentOdometer;
   final double acquisitionCost;
   final VehicleStatus status;
+  final String? region;
   final DateTime createdAt;
 
   Vehicle({
@@ -20,6 +21,7 @@ class Vehicle {
     required this.currentOdometer,
     required this.acquisitionCost,
     required this.status,
+    this.region,
     required this.createdAt,
   });
 
@@ -33,6 +35,7 @@ class Vehicle {
       currentOdometer: (json['current_odometer'] as num).toDouble(),
       acquisitionCost: (json['acquisition_cost'] as num).toDouble(),
       status: VehicleStatus.fromString(json['status'] as String),
+      region: json['region'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -47,12 +50,13 @@ class Vehicle {
       'current_odometer': currentOdometer,
       'acquisition_cost': acquisitionCost,
       'status': status.value,
+      'region': region,
       'created_at': createdAt.toIso8601String(),
     };
   }
 
   @override
   String toString() {
-    return 'Vehicle(id: $id, registrationNumber: $registrationNumber, model: $model, status: $status)';
+    return 'Vehicle(id: $id, registrationNumber: $registrationNumber, model: $model, status: $status, region: $region)';
   }
 }

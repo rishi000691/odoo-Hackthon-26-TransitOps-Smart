@@ -99,7 +99,7 @@ async function run() {
   const kpiData = await kpiRes.json();
   assert.equal(kpiRes.status, 200);
   assert.ok(kpiData.success);
-  assert.ok('fleetUtilizationPercentage' in kpiData.data);
+  assert.ok('fleet_utilization_pct' in kpiData.data);
   console.log("✓ KPIs retrieved successfully:", kpiData.data);
 
   // 3. Create Vehicle & Driver (FleetManager)
@@ -111,12 +111,12 @@ async function run() {
       'Authorization': `Bearer ${fleetManagerToken}`
     },
     body: JSON.stringify({
-      registrationNumber: "TEST-002-XYZ",
+      registration_number: "TEST-002-XYZ",
       model: "Transit Custom",
       type: "Van",
-      maxLoadCapacity: 2000.0,
-      currentOdometer: 1000.0,
-      acquisitionCost: 30000.0,
+      max_load_capacity: 2000.0,
+      current_odometer: 1000.0,
+      acquisition_cost: 30000.0,
       region: "Texas"
     })
   });
@@ -134,10 +134,10 @@ async function run() {
     },
     body: JSON.stringify({
       name: "Driver Bob",
-      licenseNumber: "LIC-TEST-99",
-      licenseCategory: "C",
-      licenseExpiryDate: "2029-05-20",
-      contactNumber: "555-9988"
+      license_number: "LIC-TEST-99",
+      license_category: "C",
+      license_expiry_date: "2029-05-20",
+      contact_number: "555-9988"
     })
   });
   const drBody = await drRes.json();
@@ -156,10 +156,10 @@ async function run() {
     body: JSON.stringify({
       source: "A",
       destination: "B",
-      vehicleId: vehicle.id,
-      driverId: driver.id,
-      cargoWeight: 2500.0, // exceeds 2000
-      plannedDistance: 100.0,
+      vehicle_id: vehicle.id,
+      driver_id: driver.id,
+      cargo_weight: 2500.0, // exceeds 2000
+      planned_distance: 100.0,
       status: "Dispatched"
     })
   });
@@ -179,10 +179,10 @@ async function run() {
     body: JSON.stringify({
       source: "A",
       destination: "B",
-      vehicleId: vehicle.id,
-      driverId: driver.id,
-      cargoWeight: 1500.0,
-      plannedDistance: 100.0,
+      vehicle_id: vehicle.id,
+      driver_id: driver.id,
+      cargo_weight: 1500.0,
+      planned_distance: 100.0,
       status: "Dispatched"
     })
   });
@@ -216,10 +216,10 @@ async function run() {
     body: JSON.stringify({
       source: "X",
       destination: "Y",
-      vehicleId: vehicle.id,
-      driverId: driver.id,
-      cargoWeight: 500.0,
-      plannedDistance: 50.0,
+      vehicle_id: vehicle.id,
+      driver_id: driver.id,
+      cargo_weight: 500.0,
+      planned_distance: 50.0,
       status: "Dispatched"
     })
   });
@@ -235,8 +235,8 @@ async function run() {
       'Authorization': `Bearer ${fleetManagerToken}`
     },
     body: JSON.stringify({
-      actualDistance: 105.5,
-      fuelConsumed: 40.0
+      actual_distance: 105.5,
+      fuel_consumed: 40.0
     })
   });
   const completeBody = await completeRes.json();
@@ -248,7 +248,7 @@ async function run() {
   });
   const finalVBody = await finalVRes.json();
   assert.equal(finalVBody.data.status, 'Available');
-  assert.equal(Number(finalVBody.data.currentOdometer), 1105.5); // 1000 + 105.5
+  assert.equal(Number(finalVBody.data.current_odometer), 1105.5); // 1000 + 105.5
 
   const finalDrRes = await fetch(`${BASE_URL}/drivers/${driver.id}`, {
     headers: { 'Authorization': `Bearer ${fleetManagerToken}` }
@@ -295,10 +295,10 @@ async function run() {
     body: JSON.stringify({
       source: "A",
       destination: "B",
-      vehicleId: vehicle.id,
-      driverId: driver.id,
-      cargoWeight: 1000.0,
-      plannedDistance: 100.0,
+      vehicle_id: vehicle.id,
+      driver_id: driver.id,
+      cargo_weight: 1000.0,
+      planned_distance: 100.0,
       status: "Dispatched"
     })
   });
@@ -324,7 +324,7 @@ async function run() {
       'Authorization': `Bearer ${fleetManagerToken}`
     },
     body: JSON.stringify({
-      vehicleId: vehicle.id,
+      vehicle_id: vehicle.id,
       description: "Replace tyres",
       cost: 500.0
     })
@@ -369,7 +369,7 @@ async function run() {
       'Authorization': `Bearer ${driverToken}`
     },
     body: JSON.stringify({
-      vehicleId: vehicle.id,
+      vehicle_id: vehicle.id,
       liters: 50.0,
       cost: 75.0
     })
@@ -384,8 +384,8 @@ async function run() {
       'Authorization': `Bearer ${financialAnalystToken}`
     },
     body: JSON.stringify({
-      vehicleId: vehicle.id,
-      expenseType: "Toll",
+      vehicle_id: vehicle.id,
+      expense_type: "Toll",
       cost: 20.0
     })
   });
