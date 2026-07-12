@@ -508,6 +508,7 @@ class _ContentArea extends StatelessWidget {
                     title: 'Register Vehicle',
                     desc: 'Add registration, type, cargo cap & odometer.',
                     accent: meta.accent,
+                    onTap: () => ctx.go(AppRouter.vehiclesPath),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -517,6 +518,7 @@ class _ContentArea extends StatelessWidget {
                     title: 'Create Trip',
                     desc: 'Schedule a dispatch — driver + vehicle.',
                     accent: const Color(0xFF6366F1),
+                    onTap: () => ctx.go(AppRouter.tripsPath),
                   ),
                 ),
               ],
@@ -527,6 +529,7 @@ class _ContentArea extends StatelessWidget {
               title: 'Register Vehicle',
               desc: 'Add registration, type, cargo cap & odometer.',
               accent: meta.accent,
+              onTap: () => ctx.go(AppRouter.vehiclesPath),
             ),
             const SizedBox(height: 10),
             _ActionCard(
@@ -534,6 +537,7 @@ class _ContentArea extends StatelessWidget {
               title: 'Create Trip',
               desc: 'Schedule a dispatch — driver + vehicle.',
               accent: const Color(0xFF6366F1),
+              onTap: () => ctx.go(AppRouter.tripsPath),
             ),
           ],
           const SizedBox(height: 28),
@@ -711,6 +715,7 @@ class _ContentArea extends StatelessWidget {
             title: 'Export Financial Report (.CSV)',
             desc: 'Full summary: revenue, fuel, tolls & ROI breakdown.',
             accent: meta.accent,
+            onTap: () => ctx.go(AppRouter.reportsPath),
           ),
         ];
     }
@@ -949,11 +954,13 @@ class _ActionCard extends StatefulWidget {
   final IconData icon;
   final String title, desc;
   final Color accent;
+  final VoidCallback? onTap;
   const _ActionCard({
     required this.icon,
     required this.title,
     required this.desc,
     required this.accent,
+    this.onTap,
   });
 
   @override
@@ -969,7 +976,7 @@ class _ActionCardState extends State<_ActionCard> {
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
       child: GestureDetector(
-        onTap: () {},
+        onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.all(16),

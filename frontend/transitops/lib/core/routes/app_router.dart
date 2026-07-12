@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/authentication/screens/login_screen.dart';
 import '../../features/authentication/screens/register_screen.dart';
@@ -11,6 +10,7 @@ import '../../features/reports/screens/reports_screen.dart';
 import '../services/service_locator.dart';
 import '../../features/authentication/repositories/auth_repository.dart';
 import '../widgets/responsive_navigation_layout.dart';
+import '../constants/enums.dart';
 
 class AppRouter {
   AppRouter._();
@@ -37,75 +37,8 @@ class AppRouter {
       ),
       ShellRoute(
         builder: (context, state, child) {
-          int currentIndex = 0;
-          if (state.uri.path.startsWith(vehiclesPath)) {
-            currentIndex = 1;
-          } else if (state.uri.path.startsWith(driversPath)) {
-            currentIndex = 2;
-          } else if (state.uri.path.startsWith(tripsPath)) {
-            currentIndex = 3;
-          } else if (state.uri.path.startsWith(maintenancePath)) {
-            currentIndex = 4;
-          } else if (state.uri.path.startsWith(reportsPath)) {
-            currentIndex = 5;
-          }
-
           return ResponsiveNavigationLayout(
-            selectedIndex: currentIndex,
-            onDestinationSelected: (index) {
-              switch (index) {
-                case 0:
-                  context.go(dashboardPath);
-                  break;
-                case 1:
-                  context.go(vehiclesPath);
-                  break;
-                case 2:
-                  context.go(driversPath);
-                  break;
-                case 3:
-                  context.go(tripsPath);
-                  break;
-                case 4:
-                  context.go(maintenancePath);
-                  break;
-                case 5:
-                  context.go(reportsPath);
-                  break;
-              }
-            },
-            items: const [
-              NavigationItem(
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard),
-                label: 'Dashboard',
-              ),
-              NavigationItem(
-                icon: Icon(Icons.directions_bus_outlined),
-                selectedIcon: Icon(Icons.directions_bus),
-                label: 'Vehicles',
-              ),
-              NavigationItem(
-                icon: Icon(Icons.people_outline),
-                selectedIcon: Icon(Icons.people),
-                label: 'Drivers',
-              ),
-              NavigationItem(
-                icon: Icon(Icons.navigation_outlined),
-                selectedIcon: Icon(Icons.navigation),
-                label: 'Trips',
-              ),
-              NavigationItem(
-                icon: Icon(Icons.build_circle_outlined),
-                selectedIcon: Icon(Icons.build_circle),
-                label: 'Maintenance',
-              ),
-              NavigationItem(
-                icon: Icon(Icons.bar_chart_outlined),
-                selectedIcon: Icon(Icons.bar_chart),
-                label: 'Reports',
-              ),
-            ],
+            currentPath: state.uri.path,
             child: child,
           );
         },
@@ -154,6 +87,29 @@ class AppRouter {
         // If logged in, block /login and /register, redirecting to /dashboard
         if (goingToLogin || goingToRegister) {
           return dashboardPath;
+        }
+
+        // Dynamic role-based route guarding
+        final user = await authRepo.getCurrentUser();
+        if (user != null) {
+          final role = user.roles.isNotEmpty ? user.roles.first : UserRole.driver;
+          final path = state.matchedLocation;
+
+          if (path == vehiclesPath && role != UserRole.fleetManager) {
+            return dashboardPath;
+          }
+          if (path == driversPath && role != UserRole.safetyOfficer) {
+            return dashboardPath;
+          }
+          if (path == tripsPath && role != UserRole.driver) {
+            return dashboardPath;
+          }
+          if (path == maintenancePath && role != UserRole.fleetManager) {
+            return dashboardPath;
+          }
+          if (path == reportsPath && role != UserRole.fleetManager && role != UserRole.financialAnalyst) {
+            return dashboardPath;
+          }
         }
       }
 

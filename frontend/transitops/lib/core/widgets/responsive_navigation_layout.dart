@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:transitops/core/constants/enums.dart';
 import 'package:transitops/core/extensions/context_extension.dart';
+import 'package:transitops/core/routes/app_router.dart';
 import 'package:transitops/features/authentication/blocs/auth_bloc.dart';
 import 'package:transitops/features/authentication/blocs/auth_event.dart';
 import 'package:transitops/features/authentication/blocs/auth_state.dart';
@@ -61,54 +63,123 @@ const _kRM = <UserRole, _RM>{
   ),
 };
 
-class NavigationItem {
-  final Widget icon;
-  final Widget selectedIcon;
+class ShellTab {
+  final IconData icon;
+  final IconData selectedIcon;
   final String label;
-
-  const NavigationItem({
+  final String path;
+  const ShellTab({
     required this.icon,
     required this.selectedIcon,
     required this.label,
+    required this.path,
   });
 }
 
 class ResponsiveNavigationLayout extends StatelessWidget {
   final Widget child;
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-  final List<NavigationItem> items;
+  final String currentPath;
 
   const ResponsiveNavigationLayout({
     super.key,
     required this.child,
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-    required this.items,
+    required this.currentPath,
   });
 
-  String _getTitleForIndex(int index) {
-    switch (index) {
-      case 0:
-        return 'Dashboard';
-      case 1:
-        return 'Vehicles';
-      case 2:
-        return 'Drivers';
-      case 3:
-        return 'Trips';
-      case 4:
-        return 'Maintenance';
-      case 5:
-        return 'Reports';
-      default:
-        return 'TransitOps';
+  List<ShellTab> _getTabsForRole(UserRole role) {
+    switch (role) {
+      case UserRole.fleetManager:
+        return const [
+          ShellTab(
+            icon: Icons.dashboard_outlined,
+            selectedIcon: Icons.dashboard,
+            label: 'Dashboard',
+            path: AppRouter.dashboardPath,
+          ),
+          ShellTab(
+            icon: Icons.directions_car_outlined,
+            selectedIcon: Icons.directions_car,
+            label: 'Vehicles',
+            path: AppRouter.vehiclesPath,
+          ),
+          ShellTab(
+            icon: Icons.build_circle_outlined,
+            selectedIcon: Icons.build_circle,
+            label: 'Maintenance',
+            path: AppRouter.maintenancePath,
+          ),
+          ShellTab(
+            icon: Icons.bar_chart_outlined,
+            selectedIcon: Icons.bar_chart,
+            label: 'Reports',
+            path: AppRouter.reportsPath,
+          ),
+        ];
+      case UserRole.driver:
+        return const [
+          ShellTab(
+            icon: Icons.dashboard_outlined,
+            selectedIcon: Icons.dashboard,
+            label: 'Dashboard',
+            path: AppRouter.dashboardPath,
+          ),
+          ShellTab(
+            icon: Icons.navigation_outlined,
+            selectedIcon: Icons.navigation,
+            label: 'Trips',
+            path: AppRouter.tripsPath,
+          ),
+        ];
+      case UserRole.safetyOfficer:
+        return const [
+          ShellTab(
+            icon: Icons.dashboard_outlined,
+            selectedIcon: Icons.dashboard,
+            label: 'Dashboard',
+            path: AppRouter.dashboardPath,
+          ),
+          ShellTab(
+            icon: Icons.person_pin_outlined,
+            selectedIcon: Icons.person_pin,
+            label: 'Drivers',
+            path: AppRouter.driversPath,
+          ),
+        ];
+      case UserRole.financialAnalyst:
+        return const [
+          ShellTab(
+            icon: Icons.dashboard_outlined,
+            selectedIcon: Icons.dashboard,
+            label: 'Dashboard',
+            path: AppRouter.dashboardPath,
+          ),
+          ShellTab(
+            icon: Icons.bar_chart_outlined,
+            selectedIcon: Icons.bar_chart,
+            label: 'Reports',
+            path: AppRouter.reportsPath,
+          ),
+        ];
     }
+  }
+
+  String _getTitleForPath(String path) {
+    if (path.startsWith(AppRouter.vehiclesPath)) return 'Vehicles';
+    if (path.startsWith(AppRouter.driversPath)) return 'Drivers';
+    if (path.startsWith(AppRouter.tripsPath)) return 'Trips';
+    if (path.startsWith(AppRouter.maintenancePath)) return 'Maintenance';
+    if (path.startsWith(AppRouter.reportsPath)) return 'Reports';
+    return 'Dashboard';
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is Unauthenticated) {
+          context.go(AppRouter.loginPath);
+        }
+      },
       builder: (context, state) {
         if (state is! Authenticated) {
           return const Scaffold(
@@ -122,6 +193,16 @@ class ResponsiveNavigationLayout extends StatelessWidget {
         final user = state.user;
         final role = user.roles.isNotEmpty ? user.roles.first : UserRole.driver;
         final meta = _kRM[role]!;
+        final tabs = _getTabsForRole(role);
+
+        // Calculate dynamic active index matching matchedLocation
+        int activeIndex = 0;
+        for (int i = 0; i < tabs.length; i++) {
+          if (currentPath.startsWith(tabs[i].path)) {
+            activeIndex = i;
+            break;
+          }
+        }
 
         if (!context.isDesktop) {
           return Scaffold(
@@ -130,16 +211,18 @@ class ResponsiveNavigationLayout extends StatelessWidget {
             bottomNavigationBar: NavigationBar(
               backgroundColor: _kSurface,
               indicatorColor: meta.accent.withValues(alpha: 0.12),
-              selectedIndex: selectedIndex,
-              onDestinationSelected: onDestinationSelected,
-              destinations: items.map((item) {
+              selectedIndex: activeIndex,
+              onDestinationSelected: (idx) {
+                context.go(tabs[idx].path);
+              },
+              destinations: tabs.map((tab) {
                 return NavigationDestination(
-                  icon: item.icon,
+                  icon: Icon(tab.icon),
                   selectedIcon: IconTheme(
                     data: IconThemeData(color: meta.accent),
-                    child: item.selectedIcon,
+                    child: Icon(tab.selectedIcon),
                   ),
-                  label: item.label,
+                  label: tab.label,
                 );
               }).toList(),
             ),
@@ -153,8 +236,8 @@ class ResponsiveNavigationLayout extends StatelessWidget {
               _Sidebar(
                 meta: meta,
                 email: user.email,
-                selectedIndex: selectedIndex,
-                onDestinationSelected: onDestinationSelected,
+                tabs: tabs,
+                selectedIndex: activeIndex,
               ),
               Expanded(
                 child: Column(
@@ -162,7 +245,7 @@ class ResponsiveNavigationLayout extends StatelessWidget {
                     _WebTopBar(
                       email: user.email,
                       meta: meta,
-                      title: _getTitleForIndex(selectedIndex),
+                      title: _getTitleForPath(currentPath),
                     ),
                     Expanded(
                       child: child,
@@ -182,27 +265,18 @@ class ResponsiveNavigationLayout extends StatelessWidget {
 class _Sidebar extends StatelessWidget {
   final _RM meta;
   final String email;
+  final List<ShellTab> tabs;
   final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
 
   const _Sidebar({
     required this.meta,
     required this.email,
+    required this.tabs,
     required this.selectedIndex,
-    required this.onDestinationSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    final navItems = [
-      (Icons.dashboard_rounded, 'Dashboard'),
-      (Icons.directions_car_rounded, 'Vehicles'),
-      (Icons.person_pin_rounded, 'Drivers'),
-      (Icons.navigation_rounded, 'Trips'),
-      (Icons.build_circle_rounded, 'Maintenance'),
-      (Icons.bar_chart_rounded, 'Reports'),
-    ];
-
     return Container(
       width: 240,
       color: _kSurface,
@@ -261,13 +335,13 @@ class _Sidebar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  for (int i = 0; i < navItems.length; i++)
+                  for (int i = 0; i < tabs.length; i++)
                     _NavTile(
-                      icon: navItems[i].$1,
-                      label: navItems[i].$2,
+                      icon: tabs[i].icon,
+                      label: tabs[i].label,
                       active: selectedIndex == i,
                       accent: meta.accent,
-                      onTap: () => onDestinationSelected(i),
+                      onTap: () => context.go(tabs[i].path),
                     ),
                 ],
               ),

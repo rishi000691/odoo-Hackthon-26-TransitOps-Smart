@@ -17,7 +17,7 @@ const _kSurfaceRaised = Color(0xFF1E293B);
 const _kTextPrimary = Color(0xFFF8FAFC);
 const _kTextSecondary = Color(0xFF94A3B8);
 const _kBorder = Color(0xFF1E293B);
-const _kAccent = Color(0xFFA855F7); // Purple accent for Reports
+const _kAccent = Color(0xFFA855F7); // Purple accent   for Reports
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
