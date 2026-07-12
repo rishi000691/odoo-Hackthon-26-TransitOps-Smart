@@ -1,0 +1,42 @@
+import 'package:get_it/get_it.dart';
+import 'package:dio/dio.dart';
+import 'package:transitops/core/config/app_config.dart';
+import 'package:transitops/core/storage/secure_storage_service.dart';
+import 'package:transitops/core/network/api_client.dart';
+
+// Repositories
+import 'package:transitops/features/authentication/repositories/auth_repository.dart';
+import 'package:transitops/features/vehicles/repositories/vehicle_repository.dart';
+import 'package:transitops/features/drivers/repositories/driver_repository.dart';
+import 'package:transitops/features/trips/repositories/trip_repository.dart';
+
+final GetIt locator = GetIt.instance;
+
+Future<void> setupLocator() async {
+  // Secure Storage
+  locator.registerLazySingleton<SecureStorageService>(() => SecureStorageService());
+
+  // Dio Client & Custom ApiClient wrapper
+  locator.registerLazySingleton<Dio>(() => Dio());
+  locator.registerLazySingleton<ApiClient>(
+    () => ApiClient(
+      dio: locator<Dio>(),
+      secureStorage: locator<SecureStorageService>(),
+      baseUrl: AppConfig.instance.apiBaseUrl,
+    ),
+  );
+
+  // Register Repositories
+  locator.registerLazySingleton<AuthRepository>(
+    () => AuthRepository(apiClient: locator<ApiClient>()),
+  );
+  locator.registerLazySingleton<VehicleRepository>(
+    () => VehicleRepository(apiClient: locator<ApiClient>()),
+  );
+  locator.registerLazySingleton<DriverRepository>(
+    () => DriverRepository(apiClient: locator<ApiClient>()),
+  );
+  locator.registerLazySingleton<TripRepository>(
+    () => TripRepository(apiClient: locator<ApiClient>()),
+  );
+}

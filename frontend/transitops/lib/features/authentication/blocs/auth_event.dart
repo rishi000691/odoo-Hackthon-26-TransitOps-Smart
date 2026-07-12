@@ -1,0 +1,14 @@
+abstract class AuthEvent {
+  const AuthEvent();
+}
+
+class AuthCheckRequested extends AuthEvent {}
+
+class AuthLoginSubmitted extends AuthEvent {
+  final String email;
+  final String password;
+
+  const AuthLoginSubmitted({required this.email, required this.password});
+}
+
+class AuthLogoutRequested extends AuthEvent {}

@@ -8,6 +8,7 @@ class SecureStorageService {
 
   static const String _accessTokenKey = 'jwt_access_token';
   static const String _refreshTokenKey = 'jwt_refresh_token';
+  static const String _userDataKey = 'jwt_user_data';
 
   /// Save access token
   Future<void> saveAccessToken(String token) async {
@@ -37,6 +38,21 @@ class SecureStorageService {
   /// Delete refresh token
   Future<void> deleteRefreshToken() async {
     await _storage.delete(key: _refreshTokenKey);
+  }
+
+  /// Save user data json string
+  Future<void> saveUserData(String userDataJson) async {
+    await _storage.write(key: _userDataKey, value: userDataJson);
+  }
+
+  /// Read user data json string
+  Future<String?> getUserData() async {
+    return await _storage.read(key: _userDataKey);
+  }
+
+  /// Delete user data json string
+  Future<void> deleteUserData() async {
+    await _storage.delete(key: _userDataKey);
   }
 
   /// Clear all stored secure data
