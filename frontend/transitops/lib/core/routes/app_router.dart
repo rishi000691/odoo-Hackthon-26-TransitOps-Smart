@@ -89,8 +89,26 @@ class AppRouter {
         ],
       ),
     ],
-    // Redirect logic stub
-    redirect: (context, state) {
+    // Redirect logic to guard paths based on session state
+    redirect: (context, state) async {
+      final authRepo = locator<AuthRepository>();
+      final loggedIn = await authRepo.isLoggedIn();
+
+      final goingToLogin = state.matchedLocation == loginPath;
+      final goingToRegister = state.matchedLocation == registerPath;
+
+      if (!loggedIn) {
+        // If not logged in, force navigation to /login unless going to /register
+        if (!goingToLogin && !goingToRegister) {
+          return loginPath;
+        }
+      } else {
+        // If logged in, block /login and /register, redirecting to /dashboard
+        if (goingToLogin || goingToRegister) {
+          return dashboardPath;
+        }
+      }
+
       return null;
     },
   );
