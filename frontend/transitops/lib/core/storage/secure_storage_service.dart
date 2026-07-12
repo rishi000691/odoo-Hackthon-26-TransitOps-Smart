@@ -55,6 +55,16 @@ class SecureStorageService {
     await _storage.delete(key: _userDataKey);
   }
 
+  /// Save the user's preferred ThemeMode ('light' | 'dark').
+  Future<void> saveThemeMode(String mode) async {
+    await _storage.write(key: 'app_theme_mode', value: mode);
+  }
+
+  /// Read the previously saved ThemeMode string, or null on first launch.
+  Future<String?> getThemeMode() async {
+    return await _storage.read(key: 'app_theme_mode');
+  }
+
   /// Clear all stored secure data
   Future<void> clearAll() async {
     await _storage.deleteAll();

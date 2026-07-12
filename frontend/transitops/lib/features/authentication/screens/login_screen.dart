@@ -9,15 +9,9 @@ import 'package:transitops/features/authentication/blocs/auth_event.dart';
 import 'package:transitops/features/authentication/blocs/auth_state.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
-const _kBg = Color(0xFF090D16);
-const _kSurface = Color(0xFF111827);
-const _kSurfaceRaised = Color(0xFF1E293B);
 const _kAccent = Color(0xFF6366F1);
 const _kAccentLight = Color(0xFF818CF8);
 const _kError = Color(0xFFF87171);
-const _kTextPrimary = Color(0xFFF8FAFC);
-const _kTextSecondary = Color(0xFF94A3B8);
-const _kBorder = Color(0xFF1E293B);
 
 const _kFeatures = [
   (Icons.local_shipping_rounded, 'Real-time fleet tracking & dispatch'),
@@ -105,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: context.kBg,
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (ctx, state) {
           if (state is Authenticated) ctx.go(AppRouter.dashboardPath);
@@ -183,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen>
                 Text(
                   'TransitOps',
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: Colors.white,
                     fontSize: 32,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
@@ -193,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen>
                 Text(
                   'The all-in-one fleet operations platform\nfor modern logistics teams.',
                   style: GoogleFonts.outfit(
-                    color: _kTextSecondary,
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 15,
                     height: 1.6,
                   ),
@@ -218,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen>
                           child: Text(
                             f.$2,
                             style: GoogleFonts.outfit(
-                              color: _kTextPrimary,
+                              color: Colors.white.withValues(alpha: 0.9),
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -232,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen>
                 Text(
                   '© 2026 TransitOps Smart. All rights reserved.',
                   style: GoogleFonts.outfit(
-                    color: _kTextSecondary,
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 12,
                   ),
                 ),
@@ -301,14 +295,14 @@ class _LoginScreenState extends State<LoginScreen>
           style: GoogleFonts.outfit(
             fontSize: 28,
             fontWeight: FontWeight.w800,
-            color: _kTextPrimary,
+            color: context.kTextPrimary,
             letterSpacing: -0.5,
           ),
         ),
         const SizedBox(height: 6),
         Text(
           'Sign in to your fleet portal',
-          style: GoogleFonts.outfit(fontSize: 14, color: _kTextSecondary),
+          style: GoogleFonts.outfit(fontSize: 14, color: context.kTextSecondary),
         ),
       ],
     );
@@ -322,9 +316,9 @@ class _LoginScreenState extends State<LoginScreen>
         return Container(
           padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
-            color: _kSurface,
+            color: context.kSurface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: _kBorder),
+            border: Border.all(color: context.kBorder),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.25),
@@ -341,7 +335,7 @@ class _LoginScreenState extends State<LoginScreen>
                 Text(
                   'Welcome back',
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: context.kTextPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                   ),
@@ -351,7 +345,7 @@ class _LoginScreenState extends State<LoginScreen>
                   'Enter your credentials to continue',
                   style: GoogleFonts.outfit(
                     fontSize: 13,
-                    color: _kTextSecondary,
+                    color: context.kTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 26),
@@ -408,7 +402,7 @@ class _LoginScreenState extends State<LoginScreen>
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
                       size: 18,
-                      color: _kTextSecondary,
+                      color: context.kTextSecondary,
                     ),
                     onPressed: () =>
                         setState(() => _obscurePass = !_obscurePass),
@@ -437,7 +431,7 @@ class _LoginScreenState extends State<LoginScreen>
     children: [
       Text(
         "Don't have an account?  ",
-        style: GoogleFonts.outfit(fontSize: 13, color: _kTextSecondary),
+        style: GoogleFonts.outfit(fontSize: 13, color: context.kTextSecondary),
       ),
       GestureDetector(
         onTap: () => context.go(AppRouter.registerPath),
@@ -455,15 +449,15 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _divider() => Row(
     children: [
-      const Expanded(child: Divider(color: _kBorder, thickness: 1)),
+      Expanded(child: Divider(color: context.kBorder, thickness: 1)),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Text(
           'Quick demo',
-          style: GoogleFonts.outfit(fontSize: 12, color: _kTextSecondary),
+          style: GoogleFonts.outfit(fontSize: 12, color: context.kTextSecondary),
         ),
       ),
-      const Expanded(child: Divider(color: _kBorder, thickness: 1)),
+      Expanded(child: Divider(color: context.kBorder, thickness: 1)),
     ],
   );
 
@@ -515,7 +509,7 @@ class _LoginScreenState extends State<LoginScreen>
     style: GoogleFonts.outfit(
       fontSize: 13,
       fontWeight: FontWeight.w600,
-      color: _kTextPrimary,
+      color: context.kTextPrimary,
     ),
   );
 
@@ -537,19 +531,19 @@ class _LoginScreenState extends State<LoginScreen>
       enabled: enabled,
       obscureText: obscure,
       keyboardType: type,
-      style: GoogleFonts.outfit(color: _kTextPrimary, fontSize: 14),
+      style: GoogleFonts.outfit(color: context.kTextPrimary, fontSize: 14),
       validator: validator,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 14),
-        fillColor: _kSurfaceRaised,
+        hintStyle: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 14),
+        fillColor: context.kSurfaceRaised,
         filled: true,
         prefixIcon: Padding(
           padding: const EdgeInsets.only(left: 14, right: 10),
           child: Icon(
             icon,
             size: 18,
-            color: focused ? _kAccentLight : _kTextSecondary,
+            color: focused ? _kAccentLight : context.kTextSecondary,
           ),
         ),
         prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
@@ -562,7 +556,7 @@ class _LoginScreenState extends State<LoginScreen>
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
-            color: focused ? _kAccent : _kBorder,
+            color: focused ? _kAccent : context.kBorder,
             width: focused ? 2 : 1,
           ),
         ),
@@ -688,12 +682,12 @@ class _QuickTileState extends State<_QuickTile> {
           decoration: BoxDecoration(
             color: _hover
                 ? widget.role.color.withValues(alpha: 0.10)
-                : _kSurface,
+                : context.kSurface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: _hover
                   ? widget.role.color.withValues(alpha: 0.45)
-                  : _kBorder,
+                  : context.kBorder,
             ),
           ),
           child: Row(
@@ -718,7 +712,7 @@ class _QuickTileState extends State<_QuickTile> {
                   style: GoogleFonts.outfit(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: _kTextPrimary,
+                    color: context.kTextPrimary,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

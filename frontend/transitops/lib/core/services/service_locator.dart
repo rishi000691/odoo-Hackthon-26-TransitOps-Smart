@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:transitops/core/config/app_config.dart';
 import 'package:transitops/core/storage/secure_storage_service.dart';
 import 'package:transitops/core/network/api_client.dart';
+import 'package:transitops/core/theme/theme_cubit.dart';
 
 // Repositories
 import 'package:transitops/features/authentication/repositories/auth_repository.dart';
@@ -17,7 +18,15 @@ final GetIt locator = GetIt.instance;
 
 Future<void> setupLocator() async {
   // Secure Storage
-  locator.registerLazySingleton<SecureStorageService>(() => SecureStorageService());
+  locator.registerLazySingleton<SecureStorageService>(
+    () => SecureStorageService(),
+  );
+
+  // Theme Cubit — registered here so it survives navigation and is accessible
+  // from both MaterialApp (for themeMode) and ResponsiveNavigationLayout (toggle).
+  locator.registerLazySingleton<ThemeCubit>(
+    () => ThemeCubit(storage: locator<SecureStorageService>()),
+  );
 
   // Dio Client & Custom ApiClient wrapper
   locator.registerLazySingleton<Dio>(() => Dio());

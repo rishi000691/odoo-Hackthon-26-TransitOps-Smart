@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:transitops/core/extensions/context_extension.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:transitops/core/constants/enums.dart';
@@ -18,11 +19,6 @@ import 'package:transitops/core/widgets/app_text_field.dart';
 import 'package:transitops/core/widgets/app_dropdown_field.dart';
 
 // Design system tokens matching the shell
-const _kBg = Color(0xFF090D16);
-const _kSurface = Color(0xFF111827);
-const _kTextPrimary = Color(0xFFF8FAFC);
-const _kTextSecondary = Color(0xFF94A3B8);
-const _kBorder = Color(0xFF1E293B);
 const _kAccent = Color(0xFF6366F1); // Indigo/Purple accent for Trips
 
 class TripsScreen extends StatefulWidget {
@@ -52,7 +48,7 @@ class _TripsScreenState extends State<TripsScreen> {
     final canManage = userRole == UserRole.fleetManager || userRole == UserRole.driver;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: context.kBg,
       body: BlocListener<TripBloc, TripState>(
         listener: (ctx, state) {
           if (state is TripOperationSuccess) {
@@ -94,7 +90,7 @@ class _TripsScreenState extends State<TripsScreen> {
                         flex: 6,
                         child: _buildListPane(filtered, loading, canManage, isWeb),
                       ),
-                      const VerticalDivider(width: 1, color: _kBorder),
+                      VerticalDivider(width: 1, color: context.kBorder),
                       Expanded(
                         flex: 4,
                         child: _buildDetailsPane(_selectedTrip, canManage, isWeb),
@@ -122,17 +118,17 @@ class _TripsScreenState extends State<TripsScreen> {
             children: [
               Expanded(
                 child: TextField(
-                  style: GoogleFonts.outfit(color: _kTextPrimary),
+                  style: GoogleFonts.outfit(color: context.kTextPrimary),
                   decoration: InputDecoration(
                     hintText: 'Search source or destination...',
-                    hintStyle: GoogleFonts.outfit(color: _kTextSecondary),
-                    fillColor: _kSurface,
+                    hintStyle: GoogleFonts.outfit(color: context.kTextSecondary),
+                    fillColor: context.kSurface,
                     filled: true,
-                    prefixIcon: const Icon(Icons.search, color: _kTextSecondary),
+                    prefixIcon: Icon(Icons.search, color: context.kTextSecondary),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: _kBorder),
+                      borderSide: BorderSide(color: context.kBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -180,7 +176,7 @@ class _TripsScreenState extends State<TripsScreen> {
                     ? Center(
                         child: Text(
                           'No trips scheduled',
-                          style: GoogleFonts.outfit(color: _kTextSecondary),
+                          style: GoogleFonts.outfit(color: context.kTextSecondary),
                         ),
                       )
                     : ListView.builder(
@@ -205,14 +201,14 @@ class _TripsScreenState extends State<TripsScreen> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? _kAccent.withValues(alpha: 0.12) : _kSurface,
+          color: active ? _kAccent.withValues(alpha: 0.12) : context.kSurface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: active ? _kAccent : _kBorder),
+          border: Border.all(color: active ? _kAccent : context.kBorder),
         ),
         child: Text(
           label,
           style: GoogleFonts.outfit(
-            color: active ? _kAccent : _kTextSecondary,
+            color: active ? _kAccent : context.kTextSecondary,
             fontSize: 12,
             fontWeight: active ? FontWeight.bold : FontWeight.normal,
           ),
@@ -241,9 +237,9 @@ class _TripsScreenState extends State<TripsScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isSelected ? _kAccent.withValues(alpha: 0.05) : _kSurface,
+        color: isSelected ? _kAccent.withValues(alpha: 0.05) : context.kSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isSelected ? _kAccent : _kBorder),
+        border: Border.all(color: isSelected ? _kAccent : context.kBorder),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -259,14 +255,14 @@ class _TripsScreenState extends State<TripsScreen> {
         title: Text(
           '${trip.source} ➔ ${trip.destination}',
           style: GoogleFonts.outfit(
-            color: _kTextPrimary,
+            color: context.kTextPrimary,
             fontWeight: FontWeight.w700,
             fontSize: 15,
           ),
         ),
         subtitle: Text(
           'Distance: ${trip.plannedDistance} km • Cargo: ${trip.cargoWeight} kg',
-          style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 13),
+          style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 13),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -287,7 +283,7 @@ class _TripsScreenState extends State<TripsScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: _kTextSecondary),
+            Icon(Icons.chevron_right, color: context.kTextSecondary),
           ],
         ),
         onTap: () {
@@ -305,18 +301,18 @@ class _TripsScreenState extends State<TripsScreen> {
   Widget _buildDetailsPane(Trip? trip, bool canManage, bool isWeb) {
     if (trip == null) {
       return Container(
-        color: _kBg,
+        color: context.kBg,
         child: Center(
           child: Text(
             'Select a trip to inspect details',
-            style: GoogleFonts.outfit(color: _kTextSecondary),
+            style: GoogleFonts.outfit(color: context.kTextSecondary),
           ),
         ),
       );
     }
 
     return Container(
-      color: _kBg,
+      color: context.kBg,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -325,7 +321,7 @@ class _TripsScreenState extends State<TripsScreen> {
             Text(
               'Trip Detail',
               style: GoogleFonts.outfit(
-                color: _kTextPrimary,
+                color: context.kTextPrimary,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -333,10 +329,10 @@ class _TripsScreenState extends State<TripsScreen> {
             const SizedBox(height: 4),
             Text(
               'Status: ${trip.status.value}',
-              style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 14),
+              style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 14),
             ),
             const SizedBox(height: 16),
-            const Divider(color: _kBorder),
+            Divider(color: context.kBorder),
             const SizedBox(height: 16),
             _buildInfoRow('Source', trip.source),
             _buildInfoRow('Destination', trip.destination),
@@ -397,8 +393,8 @@ class _TripsScreenState extends State<TripsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 13)),
-          Text(value, style: GoogleFonts.outfit(color: _kTextPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+          Text(label, style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 13)),
+          Text(value, style: GoogleFonts.outfit(color: context.kTextPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
         ],
       ),
     );
@@ -413,7 +409,7 @@ class _TripsScreenState extends State<TripsScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: _kBg,
+      backgroundColor: context.kBg,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) {
         return BlocProvider.value(
@@ -445,8 +441,8 @@ class _TripsScreenState extends State<TripsScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          backgroundColor: _kSurface,
-          title: Text('Schedule Trip (Draft)', style: GoogleFonts.outfit(color: _kTextPrimary, fontWeight: FontWeight.bold)),
+          backgroundColor: context.kSurface,
+          title: Text('Schedule Trip (Draft)', style: GoogleFonts.outfit(color: context.kTextPrimary, fontWeight: FontWeight.bold)),
           content: SingleChildScrollView(
             child: Form(
               key: formKey,
@@ -548,7 +544,7 @@ class _TripsScreenState extends State<TripsScreen> {
                 context.read<DriverBloc>().add(const FetchDrivers());
                 Navigator.pop(ctx);
               },
-              child: Text('Cancel', style: GoogleFonts.outfit(color: _kTextSecondary)),
+              child: Text('Cancel', style: GoogleFonts.outfit(color: context.kTextSecondary)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: _kAccent),
@@ -590,8 +586,8 @@ class _TripsScreenState extends State<TripsScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          backgroundColor: _kSurface,
-          title: Text('Complete Trip Report', style: GoogleFonts.outfit(color: _kTextPrimary, fontWeight: FontWeight.bold)),
+          backgroundColor: context.kSurface,
+          title: Text('Complete Trip Report', style: GoogleFonts.outfit(color: context.kTextPrimary, fontWeight: FontWeight.bold)),
           content: Form(
             key: formKey,
             child: Column(
@@ -625,7 +621,7 @@ class _TripsScreenState extends State<TripsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('Cancel', style: GoogleFonts.outfit(color: _kTextSecondary)),
+              child: Text('Cancel', style: GoogleFonts.outfit(color: context.kTextSecondary)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),

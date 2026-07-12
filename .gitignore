@@ -6,3 +6,15 @@ dist/
 frontend/transitops/Hari.md
 .env
 .DS_Store
+**/.DS_Store
+
+# Flutter/Dart Ignores
+frontend/transitops/.dart_tool/
+frontend/transitops/build/
+frontend/transitops/.flutter-plugins
+frontend/transitops/.flutter-plugins-dependencies
+frontend/transitops/.packages
+frontend/transitops/android/local.properties
+frontend/transitops/android/key.properties
+frontend/transitops/Unconfirmed *
+*.crdownload

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/config/app_config.dart';
 import 'core/routes/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_cubit.dart';
 import 'core/services/service_locator.dart';
 import 'features/authentication/blocs/auth_bloc.dart';
 import 'features/authentication/blocs/auth_event.dart';
@@ -35,6 +36,9 @@ Future<void> main() async {
   // Set up dependency injection
   await setupLocator();
 
+  // Load the persisted theme before the first frame so there is no flash.
+  await locator<ThemeCubit>().loadSavedTheme();
+
   runApp(const MyApp());
 }
 
@@ -45,6 +49,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        // Theme cubit — provided at the root so every descendant can toggle.
+        BlocProvider<ThemeCubit>.value(value: locator<ThemeCubit>()),
         BlocProvider<AuthBloc>(
           create: (context) =>
               AuthBloc(authRepository: locator<AuthRepository>())
@@ -63,8 +69,9 @@ class MyApp extends StatelessWidget {
               TripBloc(tripRepository: locator<TripRepository>()),
         ),
         BlocProvider<MaintenanceBloc>(
-          create: (context) =>
-              MaintenanceBloc(maintenanceRepository: locator<MaintenanceRepository>()),
+          create: (context) => MaintenanceBloc(
+            maintenanceRepository: locator<MaintenanceRepository>(),
+          ),
         ),
         BlocProvider<ExpenseBloc>(
           create: (context) =>
@@ -75,14 +82,15 @@ class MyApp extends StatelessWidget {
               ReportBloc(reportRepository: locator<ReportRepository>()),
         ),
       ],
-      child: ValueListenableBuilder<ThemeMode>(
-        valueListenable: AppTheme.themeModeNotifier,
-        builder: (context, currentMode, _) {
+      // BlocBuilder listens to ThemeCubit so that toggling re-builds MaterialApp
+      // with the new ThemeMode — making every screen switch simultaneously.
+      child: BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, themeMode) {
           return MaterialApp.router(
             title: 'TransitOps',
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
-            themeMode: currentMode,
+            themeMode: themeMode,
             routerConfig: AppRouter.router,
             debugShowCheckedModeBanner: false,
           );

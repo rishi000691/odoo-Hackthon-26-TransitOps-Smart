@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:transitops/core/extensions/context_extension.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:transitops/core/constants/enums.dart';
@@ -12,12 +13,6 @@ import 'package:transitops/core/widgets/app_text_field.dart';
 import 'package:transitops/core/widgets/app_dropdown_field.dart';
 
 // Design system tokens matching the shell
-const _kBg = Color(0xFF090D16);
-const _kSurface = Color(0xFF111827);
-const _kSurfaceRaised = Color(0xFF1E293B);
-const _kTextPrimary = Color(0xFFF8FAFC);
-const _kTextSecondary = Color(0xFF94A3B8);
-const _kBorder = Color(0xFF1E293B);
 const _kAccent = Color(0xFF10B981); // Emerald green accent for Drivers
 
 class DriversScreen extends StatefulWidget {
@@ -31,7 +26,6 @@ class _DriversScreenState extends State<DriversScreen> {
   String _searchQuery = '';
   String? _selectedStatusFilter;
   Driver? _selectedDriver;
-  String _sortBy = 'name';
 
   @override
   void initState() {
@@ -42,16 +36,14 @@ class _DriversScreenState extends State<DriversScreen> {
   @override
   Widget build(BuildContext context) {
     final userState = context.read<AuthBloc>().state;
-    final userRole =
-        userState is Authenticated && userState.user.roles.isNotEmpty
+    final userRole = userState is Authenticated && userState.user.roles.isNotEmpty
         ? userState.user.roles.first
         : UserRole.driver;
-    final canRegister =
-        userRole == UserRole.fleetManager || userRole == UserRole.safetyOfficer;
+    final canRegister = userRole == UserRole.fleetManager || userRole == UserRole.safetyOfficer;
     final isSafetyOfficer = userRole == UserRole.safetyOfficer;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: context.kBg,
       body: BlocListener<DriverBloc, DriverState>(
         listener: (ctx, state) {
           if (state is DriverOperationSuccess) {
@@ -80,27 +72,11 @@ class _DriversScreenState extends State<DriversScreen> {
 
             // Apply search & filters
             final filtered = list.where((d) {
-              final matchSearch =
-                  d.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                  d.licenseNumber.toLowerCase().contains(
-                    _searchQuery.toLowerCase(),
-                  );
-              final matchStatus =
-                  _selectedStatusFilter == null ||
-                  d.status.value == _selectedStatusFilter;
+              final matchSearch = d.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                  d.licenseNumber.toLowerCase().contains(_searchQuery.toLowerCase());
+              final matchStatus = _selectedStatusFilter == null || d.status.value == _selectedStatusFilter;
               return matchSearch && matchStatus;
             }).toList();
-
-            // Apply sorting
-            if (_sortBy == 'name') {
-              filtered.sort((a, b) => a.name.compareTo(b.name));
-            } else if (_sortBy == 'score') {
-              filtered.sort((a, b) => b.safetyScore.compareTo(a.safetyScore));
-            } else if (_sortBy == 'expiry') {
-              filtered.sort(
-                (a, b) => a.licenseExpiryDate.compareTo(b.licenseExpiryDate),
-              );
-            }
 
             return LayoutBuilder(
               builder: (context, constraints) {
@@ -110,33 +86,17 @@ class _DriversScreenState extends State<DriversScreen> {
                     children: [
                       Expanded(
                         flex: 6,
-                        child: _buildListPane(
-                          filtered,
-                          loading,
-                          canRegister,
-                          isSafetyOfficer,
-                          isWeb,
-                        ),
+                        child: _buildListPane(filtered, loading, canRegister, isSafetyOfficer, isWeb),
                       ),
-                      const VerticalDivider(width: 1, color: _kBorder),
+                      VerticalDivider(width: 1, color: context.kBorder),
                       Expanded(
                         flex: 4,
-                        child: _buildDetailsPane(
-                          _selectedDriver,
-                          isSafetyOfficer,
-                          isWeb,
-                        ),
+                        child: _buildDetailsPane(_selectedDriver, isSafetyOfficer, isWeb),
                       ),
                     ],
                   );
                 } else {
-                  return _buildListPane(
-                    filtered,
-                    loading,
-                    canRegister,
-                    isSafetyOfficer,
-                    isWeb,
-                  );
+                  return _buildListPane(filtered, loading, canRegister, isSafetyOfficer, isWeb);
                 }
               },
             );
@@ -146,13 +106,7 @@ class _DriversScreenState extends State<DriversScreen> {
     );
   }
 
-  Widget _buildListPane(
-    List<Driver> list,
-    bool loading,
-    bool canRegister,
-    bool isSafetyOfficer,
-    bool isWeb,
-  ) {
+  Widget _buildListPane(List<Driver> list, bool loading, bool canRegister, bool isSafetyOfficer, bool isWeb) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -162,23 +116,17 @@ class _DriversScreenState extends State<DriversScreen> {
             children: [
               Expanded(
                 child: TextField(
-                  style: GoogleFonts.outfit(color: _kTextPrimary),
+                  style: GoogleFonts.outfit(color: context.kTextPrimary),
                   decoration: InputDecoration(
                     hintText: 'Search driver name or license...',
-                    hintStyle: GoogleFonts.outfit(color: _kTextSecondary),
-                    fillColor: _kSurface,
+                    hintStyle: GoogleFonts.outfit(color: context.kTextSecondary),
+                    fillColor: context.kSurface,
                     filled: true,
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: _kTextSecondary,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+                    prefixIcon: Icon(Icons.search, color: context.kTextSecondary),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: _kBorder),
+                      borderSide: BorderSide(color: context.kBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -194,19 +142,11 @@ class _DriversScreenState extends State<DriversScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _kAccent,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   icon: const Icon(Icons.add, size: 18),
-                  label: Text(
-                    'Add',
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
-                  ),
+                  label: Text('Add', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
                   onPressed: () => _showRegisterDriverDialog(context),
                 ),
               ],
@@ -218,142 +158,40 @@ class _DriversScreenState extends State<DriversScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildFilterChip(
-                  'All',
-                  null,
-                  _selectedStatusFilter,
-                  (v) => setState(() => _selectedStatusFilter = null),
-                ),
-                _buildFilterChip(
-                  'Available',
-                  'Available',
-                  _selectedStatusFilter,
-                  (v) => setState(() => _selectedStatusFilter = 'Available'),
-                ),
-                _buildFilterChip(
-                  'On Trip',
-                  'On Trip',
-                  _selectedStatusFilter,
-                  (v) => setState(() => _selectedStatusFilter = 'On Trip'),
-                ),
-                _buildFilterChip(
-                  'Off Duty',
-                  'Off Duty',
-                  _selectedStatusFilter,
-                  (v) => setState(() => _selectedStatusFilter = 'Off Duty'),
-                ),
-                _buildFilterChip(
-                  'Suspended',
-                  'Suspended',
-                  _selectedStatusFilter,
-                  (v) => setState(() => _selectedStatusFilter = 'Suspended'),
-                ),
+                _buildFilterChip('All', null, _selectedStatusFilter, (v) => setState(() => _selectedStatusFilter = null)),
+                _buildFilterChip('Available', 'Available', _selectedStatusFilter, (v) => setState(() => _selectedStatusFilter = 'Available')),
+                _buildFilterChip('On Trip', 'On Trip', _selectedStatusFilter, (v) => setState(() => _selectedStatusFilter = 'On Trip')),
+                _buildFilterChip('Off Duty', 'Off Duty', _selectedStatusFilter, (v) => setState(() => _selectedStatusFilter = 'Off Duty')),
+                _buildFilterChip('Suspended', 'Suspended', _selectedStatusFilter, (v) => setState(() => _selectedStatusFilter = 'Suspended')),
               ],
             ),
           ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Text(
-                'Sort by:',
-                style: GoogleFonts.outfit(
-                  color: _kTextSecondary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: _kSurface,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: _kBorder),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _sortBy,
-                    dropdownColor: _kSurface,
-                    style: GoogleFonts.outfit(
-                      color: _kTextPrimary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    icon: const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: _kAccent,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    menuMaxHeight: 250,
-                    items: [
-                      DropdownMenuItem(
-                        value: 'name',
-                        child: Text(
-                          'Driver Name',
-                          style: GoogleFonts.outfit(color: _kTextPrimary),
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'score',
-                        child: Text(
-                          'Safety Score (High to Low)',
-                          style: GoogleFonts.outfit(color: _kTextPrimary),
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'expiry',
-                        child: Text(
-                          'License Expiry (Soonest First)',
-                          style: GoogleFonts.outfit(color: _kTextPrimary),
-                        ),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _sortBy = value;
-                        });
-                      }
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Expanded(
             child: loading && list.isEmpty
-                ? const Center(
-                    child: CircularProgressIndicator(color: _kAccent),
-                  )
+                ? const Center(child: CircularProgressIndicator(color: _kAccent))
                 : list.isEmpty
-                ? Center(
-                    child: Text(
-                      'No drivers found',
-                      style: GoogleFonts.outfit(color: _kTextSecondary),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: list.length,
-                    itemBuilder: (ctx, index) {
-                      final driver = list[index];
-                      final isSelected = _selectedDriver?.id == driver.id;
-                      return _buildDriverCard(driver, isSelected, isWeb);
-                    },
-                  ),
+                    ? Center(
+                        child: Text(
+                          'No drivers found',
+                          style: GoogleFonts.outfit(color: context.kTextSecondary),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: list.length,
+                        itemBuilder: (ctx, index) {
+                          final driver = list[index];
+                          final isSelected = _selectedDriver?.id == driver.id;
+                          return _buildDriverCard(driver, isSelected, isWeb);
+                        },
+                      ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFilterChip(
-    String label,
-    String? value,
-    String? groupValue,
-    ValueChanged<String?> onSelected,
-  ) {
+  Widget _buildFilterChip(String label, String? value, String? groupValue, ValueChanged<String?> onSelected) {
     final active = value == groupValue;
     return GestureDetector(
       onTap: () => onSelected(value),
@@ -361,14 +199,14 @@ class _DriversScreenState extends State<DriversScreen> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? _kAccent.withValues(alpha: 0.12) : _kSurface,
+          color: active ? _kAccent.withValues(alpha: 0.12) : context.kSurface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: active ? _kAccent : _kBorder),
+          border: Border.all(color: active ? _kAccent : context.kBorder),
         ),
         child: Text(
           label,
           style: GoogleFonts.outfit(
-            color: active ? _kAccent : _kTextSecondary,
+            color: active ? _kAccent : context.kTextSecondary,
             fontSize: 12,
             fontWeight: active ? FontWeight.bold : FontWeight.normal,
           ),
@@ -410,14 +248,12 @@ class _DriversScreenState extends State<DriversScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isSelected ? _kAccent.withValues(alpha: 0.05) : _kSurface,
+        color: isSelected ? _kAccent.withValues(alpha: 0.05) : context.kSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isSelected
               ? _kAccent
-              : (isExpiringSoon
-                    ? Colors.redAccent.withValues(alpha: 0.5)
-                    : _kBorder),
+              : (isExpiringSoon ? Colors.redAccent.withValues(alpha: 0.5) : context.kBorder),
         ),
       ),
       child: ListTile(
@@ -436,7 +272,7 @@ class _DriversScreenState extends State<DriversScreen> {
             Text(
               driver.name,
               style: GoogleFonts.outfit(
-                color: _kTextPrimary,
+                color: context.kTextPrimary,
                 fontWeight: FontWeight.w700,
                 fontSize: 15,
               ),
@@ -449,7 +285,7 @@ class _DriversScreenState extends State<DriversScreen> {
         ),
         subtitle: Text(
           'License: ${driver.licenseNumber} (${driver.licenseCategory})',
-          style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 13),
+          style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 13),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -459,10 +295,7 @@ class _DriversScreenState extends State<DriversScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
@@ -479,16 +312,12 @@ class _DriversScreenState extends State<DriversScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'Score: ${score.toStringAsFixed(1)}',
-                  style: GoogleFonts.outfit(
-                    color: scoreColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                  ),
+                  style: GoogleFonts.outfit(color: scoreColor, fontWeight: FontWeight.bold, fontSize: 11),
                 ),
               ],
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: _kTextSecondary),
+            Icon(Icons.chevron_right, color: context.kTextSecondary),
           ],
         ),
         onTap: () {
@@ -506,11 +335,11 @@ class _DriversScreenState extends State<DriversScreen> {
   Widget _buildDetailsPane(Driver? driver, bool isSafetyOfficer, bool isWeb) {
     if (driver == null) {
       return Container(
-        color: _kBg,
+        color: context.kBg,
         child: Center(
           child: Text(
             'Select a driver to inspect details',
-            style: GoogleFonts.outfit(color: _kTextSecondary),
+            style: GoogleFonts.outfit(color: context.kTextSecondary),
           ),
         ),
       );
@@ -530,7 +359,7 @@ class _DriversScreenState extends State<DriversScreen> {
     final isExpiringSoon = daysLeft <= 14;
 
     return Container(
-      color: _kBg,
+      color: context.kBg,
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -545,59 +374,43 @@ class _DriversScreenState extends State<DriversScreen> {
                       Text(
                         driver.name,
                         style: GoogleFonts.outfit(
-                          color: _kTextPrimary,
+                          color: context.kTextPrimary,
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
                         'Status: ${driver.status.value}',
-                        style: GoogleFonts.outfit(
-                          color: _kTextSecondary,
-                          fontSize: 14,
-                        ),
+                        style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 14),
                       ),
                     ],
                   ),
                 ),
                 if (isSafetyOfficer && driver.status != DriverStatus.suspended)
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                    ),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
                     onPressed: () => _suspendDriver(driver),
-                    child: Text(
-                      'Suspend',
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: Text('Suspend', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
               ],
             ),
             const SizedBox(height: 16),
-            const Divider(color: _kBorder),
+            Divider(color: context.kBorder),
             const SizedBox(height: 16),
             _buildInfoRow('Contact Number', driver.contactNumber),
             _buildInfoRow('License Number', driver.licenseNumber),
             _buildInfoRow('License Category', driver.licenseCategory),
             _buildInfoRow(
               'License Expiry',
-              isExpiringSoon
-                  ? '$expiryText ($daysLeft days left!)'
-                  : expiryText,
-              valueColor: isExpiringSoon ? Colors.redAccent : _kTextPrimary,
+              isExpiringSoon ? '$expiryText ($daysLeft days left!)' : expiryText,
+              valueColor: isExpiringSoon ? Colors.redAccent : context.kTextPrimary,
             ),
             _buildInfoRow(
               'Safety Score',
               score.toStringAsFixed(1),
               valueColor: scoreColor,
             ),
-            _buildInfoRow(
-              'Registered On',
-              driver.createdAt.toString().split(' ').first,
-            ),
+            _buildInfoRow('Registered On', driver.createdAt.toString().split(' ').first),
           ],
         ),
       ),
@@ -610,14 +423,11 @@ class _DriversScreenState extends State<DriversScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 13),
-          ),
+          Text(label, style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 13)),
           Text(
             value,
             style: GoogleFonts.outfit(
-              color: valueColor ?? _kTextPrimary,
+              color: valueColor ?? context.kTextPrimary,
               fontWeight: FontWeight.w600,
               fontSize: 13,
             ),
@@ -629,18 +439,15 @@ class _DriversScreenState extends State<DriversScreen> {
 
   void _showMobileDetailsSheet(BuildContext context, Driver driver) {
     final userState = context.read<AuthBloc>().state;
-    final userRole =
-        userState is Authenticated && userState.user.roles.isNotEmpty
+    final userRole = userState is Authenticated && userState.user.roles.isNotEmpty
         ? userState.user.roles.first
         : UserRole.driver;
     final isSafetyOfficer = userRole == UserRole.safetyOfficer;
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: _kBg,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: context.kBg,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) {
         return BlocProvider.value(
           value: context.read<DriverBloc>(),
@@ -666,14 +473,8 @@ class _DriversScreenState extends State<DriversScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          backgroundColor: _kSurface,
-          title: Text(
-            'Register New Driver',
-            style: GoogleFonts.outfit(
-              color: _kTextPrimary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          backgroundColor: context.kSurface,
+          title: Text('Register New Driver', style: GoogleFonts.outfit(color: context.kTextPrimary, fontWeight: FontWeight.bold)),
           content: SingleChildScrollView(
             child: Form(
               key: formKey,
@@ -684,16 +485,14 @@ class _DriversScreenState extends State<DriversScreen> {
                     label: 'Driver Name',
                     hintText: 'e.g. John Doe',
                     controller: nameCtrl,
-                    validator: (v) =>
-                        v == null || v.isEmpty ? 'Field required' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'Field required' : null,
                   ),
                   const SizedBox(height: 12),
                   AppTextField(
                     label: 'License Number',
                     hintText: 'e.g. DL-12345678',
                     controller: licenseCtrl,
-                    validator: (v) =>
-                        v == null || v.isEmpty ? 'Field required' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'Field required' : null,
                   ),
                   const SizedBox(height: 12),
                   StatefulBuilder(
@@ -702,26 +501,13 @@ class _DriversScreenState extends State<DriversScreen> {
                         label: 'License Category',
                         value: categoryCtrl.text,
                         items: const [
-                          DropdownMenuItem(
-                            value: 'A',
-                            child: Text('Category A'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'B',
-                            child: Text('Category B'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'C',
-                            child: Text('Category C'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'D',
-                            child: Text('Category D'),
-                          ),
+                          DropdownMenuItem(value: 'A', child: Text('Category A')),
+                          DropdownMenuItem(value: 'B', child: Text('Category B')),
+                          DropdownMenuItem(value: 'C', child: Text('Category C')),
+                          DropdownMenuItem(value: 'D', child: Text('Category D')),
                         ],
                         onChanged: (val) {
-                          if (val != null)
-                            setDialogState(() => categoryCtrl.text = val);
+                          if (val != null) setDialogState(() => categoryCtrl.text = val);
                         },
                       );
                     },
@@ -734,17 +520,13 @@ class _DriversScreenState extends State<DriversScreen> {
                         children: [
                           Text(
                             'License Expiry Date',
-                            style: GoogleFonts.outfit(
-                              color: _kTextPrimary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: GoogleFonts.outfit(color: context.kTextPrimary, fontSize: 13, fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 8),
                           ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _kSurfaceRaised,
-                              foregroundColor: _kTextPrimary,
+                              backgroundColor: context.kSurfaceRaised,
+                              foregroundColor: context.kTextPrimary,
                               alignment: Alignment.centerLeft,
                               minimumSize: const Size.fromHeight(48),
                             ),
@@ -755,9 +537,7 @@ class _DriversScreenState extends State<DriversScreen> {
                                 context: context,
                                 initialDate: expiryDate,
                                 firstDate: DateTime.now(),
-                                lastDate: DateTime.now().add(
-                                  const Duration(days: 3650),
-                                ),
+                                lastDate: DateTime.now().add(const Duration(days: 3650)),
                               );
                               if (picked != null) {
                                 setDialogState(() => expiryDate = picked);
@@ -774,17 +554,14 @@ class _DriversScreenState extends State<DriversScreen> {
                     hintText: 'e.g. +15550199',
                     controller: contactCtrl,
                     keyboardType: TextInputType.phone,
-                    validator: (v) =>
-                        v == null || v.isEmpty ? 'Field required' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'Field required' : null,
                   ),
                   const SizedBox(height: 12),
                   AppTextField(
                     label: 'Initial Safety Score',
                     controller: scoreCtrl,
                     keyboardType: TextInputType.number,
-                    validator: (v) => double.tryParse(v ?? '') == null
-                        ? 'Enter valid number'
-                        : null,
+                    validator: (v) => double.tryParse(v ?? '') == null ? 'Enter valid number' : null,
                   ),
                 ],
               ),
@@ -793,32 +570,24 @@ class _DriversScreenState extends State<DriversScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.outfit(color: _kTextSecondary),
-              ),
+              child: Text('Cancel', style: GoogleFonts.outfit(color: context.kTextSecondary)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: _kAccent),
               onPressed: () {
                 if (formKey.currentState!.validate()) {
-                  context.read<DriverBloc>().add(
-                    AddDriver(
-                      name: nameCtrl.text,
-                      licenseNumber: licenseCtrl.text,
-                      licenseCategory: categoryCtrl.text,
-                      licenseExpiryDate: expiryDate,
-                      contactNumber: contactCtrl.text,
-                      safetyScore: double.parse(scoreCtrl.text),
-                    ),
-                  );
+                  context.read<DriverBloc>().add(AddDriver(
+                        name: nameCtrl.text,
+                        licenseNumber: licenseCtrl.text,
+                        licenseCategory: categoryCtrl.text,
+                        licenseExpiryDate: expiryDate,
+                        contactNumber: contactCtrl.text,
+                        safetyScore: double.parse(scoreCtrl.text),
+                      ));
                   Navigator.pop(ctx);
                 }
               },
-              child: Text(
-                'Register',
-                style: GoogleFonts.outfit(color: Colors.white),
-              ),
+              child: Text('Register', style: GoogleFonts.outfit(color: Colors.white)),
             ),
           ],
         );
@@ -827,9 +596,10 @@ class _DriversScreenState extends State<DriversScreen> {
   }
 
   void _suspendDriver(Driver driver) {
-    context.read<DriverBloc>().add(
-      UpdateDriver(id: driver.id, fields: {'status': 'Suspended'}),
-    );
+    context.read<DriverBloc>().add(UpdateDriver(
+          id: driver.id,
+          fields: {'status': 'Suspended'},
+        ));
   }
 
   void _showSnackBar(BuildContext context, String message, Color color) {

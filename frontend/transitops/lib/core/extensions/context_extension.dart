@@ -49,3 +49,39 @@ extension ContextExtension on BuildContext {
     return mobile;
   }
 }
+
+// ─── Theme-aware design tokens ────────────────────────────────────────────────
+/// Provides the same six surface/text tokens used by every screen in the app,
+/// but resolved from the active [ThemeData] brightness so the dark/light
+/// toggle works app-wide.
+///
+/// Dark values intentionally match the hardcoded constants that already exist
+/// in each screen file (0xFF090D16, etc.) so dark mode is pixel-identical.
+/// Light values use the app's neutral palette for a clean, readable light UI.
+extension AppThemeTokens on BuildContext {
+  bool get _isDark => Theme.of(this).brightness == Brightness.dark;
+
+  /// Page / scaffold background.
+  Color get kBg =>
+      _isDark ? const Color(0xFF090D16) : const Color(0xFFF7F7F7);
+
+  /// Card / panel surface (one layer above bg).
+  Color get kSurface =>
+      _isDark ? const Color(0xFF111827) : const Color(0xFFFFFFFF);
+
+  /// Raised surface (hover states, nested cards).
+  Color get kSurfaceRaised =>
+      _isDark ? const Color(0xFF1E293B) : const Color(0xFFE5E5E5);
+
+  /// Primary text — high contrast.
+  Color get kTextPrimary =>
+      _isDark ? const Color(0xFFF8FAFC) : const Color(0xFF1A1A1A);
+
+  /// Secondary / muted text.
+  Color get kTextSecondary =>
+      _isDark ? const Color(0xFF94A3B8) : const Color(0xFF7A7A7A);
+
+  /// Divider / border lines.
+  Color get kBorder =>
+      _isDark ? const Color(0xFF1E293B) : const Color(0xFFE5E5E5);
+}

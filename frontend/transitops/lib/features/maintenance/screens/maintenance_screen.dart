@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:transitops/core/extensions/context_extension.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:transitops/core/constants/enums.dart';
@@ -15,11 +16,6 @@ import 'package:transitops/core/widgets/app_text_field.dart';
 import 'package:transitops/core/widgets/app_dropdown_field.dart';
 
 // Design system tokens matching the shell
-const _kBg = Color(0xFF090D16);
-const _kSurface = Color(0xFF111827);
-const _kTextPrimary = Color(0xFFF8FAFC);
-const _kTextSecondary = Color(0xFF94A3B8);
-const _kBorder = Color(0xFF1E293B);
 const _kAccent = Color(0xFFF97316); // Orange accent for Maintenance
 
 class MaintenanceScreen extends StatefulWidget {
@@ -54,7 +50,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
         userState.user.roles.contains(UserRole.fleetManager);
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: context.kBg,
       body: BlocListener<MaintenanceBloc, MaintenanceState>(
         listener: (ctx, state) {
           if (state is MaintenanceOperationSuccess) {
@@ -98,7 +94,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
                         flex: 6,
                         child: _buildListPane(activeLogs, closedLogs, loading, isManager, isWeb),
                       ),
-                      const VerticalDivider(width: 1, color: _kBorder),
+                      VerticalDivider(width: 1, color: context.kBorder),
                       Expanded(
                         flex: 4,
                         child: _buildDetailsPane(_selectedLog, isManager, isWeb),
@@ -132,17 +128,17 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
             children: [
               Expanded(
                 child: TextField(
-                  style: GoogleFonts.outfit(color: _kTextPrimary),
+                  style: GoogleFonts.outfit(color: context.kTextPrimary),
                   decoration: InputDecoration(
                     hintText: 'Search description...',
-                    hintStyle: GoogleFonts.outfit(color: _kTextSecondary),
-                    fillColor: _kSurface,
+                    hintStyle: GoogleFonts.outfit(color: context.kTextSecondary),
+                    fillColor: context.kSurface,
                     filled: true,
-                    prefixIcon: const Icon(Icons.search, color: _kTextSecondary),
+                    prefixIcon: Icon(Icons.search, color: context.kTextSecondary),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: _kBorder),
+                      borderSide: BorderSide(color: context.kBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -173,7 +169,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
             controller: _tabController,
             indicatorColor: _kAccent,
             labelColor: _kAccent,
-            unselectedLabelColor: _kTextSecondary,
+            unselectedLabelColor: context.kTextSecondary,
             tabs: const [
               Tab(text: 'Active'),
               Tab(text: 'Closed'),
@@ -201,7 +197,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
       return Center(
         child: Text(
           'No maintenance logs found',
-          style: GoogleFonts.outfit(color: _kTextSecondary),
+          style: GoogleFonts.outfit(color: context.kTextSecondary),
         ),
       );
     }
@@ -223,9 +219,9 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isSelected ? _kAccent.withValues(alpha: 0.05) : _kSurface,
+        color: isSelected ? _kAccent.withValues(alpha: 0.05) : context.kSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isSelected ? _kAccent : _kBorder),
+        border: Border.all(color: isSelected ? _kAccent : context.kBorder),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -241,7 +237,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
         title: Text(
           log.description,
           style: GoogleFonts.outfit(
-            color: _kTextPrimary,
+            color: context.kTextPrimary,
             fontWeight: FontWeight.w700,
             fontSize: 15,
           ),
@@ -250,7 +246,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
         ),
         subtitle: Text(
           'Vehicle ID: ${log.vehicleId.substring(0, 8)}... • Cost: \$${log.cost}',
-          style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 13),
+          style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 13),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -271,7 +267,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: _kTextSecondary),
+            Icon(Icons.chevron_right, color: context.kTextSecondary),
           ],
         ),
         onTap: () {
@@ -289,11 +285,11 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
   Widget _buildDetailsPane(MaintenanceLog? log, bool isManager, bool isWeb) {
     if (log == null) {
       return Container(
-        color: _kBg,
+        color: context.kBg,
         child: Center(
           child: Text(
             'Select a log to inspect details',
-            style: GoogleFonts.outfit(color: _kTextSecondary),
+            style: GoogleFonts.outfit(color: context.kTextSecondary),
           ),
         ),
       );
@@ -303,7 +299,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
     final statusColor = isActive ? const Color(0xFFF97316) : const Color(0xFF10B981);
 
     return Container(
-      color: _kBg,
+      color: context.kBg,
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -312,7 +308,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
             Text(
               'Maintenance Detail',
               style: GoogleFonts.outfit(
-                color: _kTextPrimary,
+                color: context.kTextPrimary,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -323,7 +319,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
               style: GoogleFonts.outfit(color: statusColor, fontSize: 14, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
-            const Divider(color: _kBorder),
+            Divider(color: context.kBorder),
             const SizedBox(height: 16),
             _buildInfoRow('Vehicle UUID', log.vehicleId),
             _buildInfoRow('Description', log.description),
@@ -355,12 +351,12 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 13)),
+          Text(label, style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 13)),
           Expanded(
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: GoogleFonts.outfit(color: _kTextPrimary, fontWeight: FontWeight.w600, fontSize: 13),
+              style: GoogleFonts.outfit(color: context.kTextPrimary, fontWeight: FontWeight.w600, fontSize: 13),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -377,7 +373,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: _kBg,
+      backgroundColor: context.kBg,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) {
         return BlocProvider.value(
@@ -404,8 +400,8 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          backgroundColor: _kSurface,
-          title: Text('Log Maintenance Log', style: GoogleFonts.outfit(color: _kTextPrimary, fontWeight: FontWeight.bold)),
+          backgroundColor: context.kSurface,
+          title: Text('Log Maintenance Log', style: GoogleFonts.outfit(color: context.kTextPrimary, fontWeight: FontWeight.bold)),
           content: SingleChildScrollView(
             child: Form(
               key: formKey,
@@ -461,7 +457,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('Cancel', style: GoogleFonts.outfit(color: _kTextSecondary)),
+              child: Text('Cancel', style: GoogleFonts.outfit(color: context.kTextSecondary)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: _kAccent),
@@ -495,8 +491,8 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          backgroundColor: _kSurface,
-          title: Text('Close Maintenance Log', style: GoogleFonts.outfit(color: _kTextPrimary, fontWeight: FontWeight.bold)),
+          backgroundColor: context.kSurface,
+          title: Text('Close Maintenance Log', style: GoogleFonts.outfit(color: context.kTextPrimary, fontWeight: FontWeight.bold)),
           content: Form(
             key: formKey,
             child: Column(
@@ -514,7 +510,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('Cancel', style: GoogleFonts.outfit(color: _kTextSecondary)),
+              child: Text('Cancel', style: GoogleFonts.outfit(color: context.kTextSecondary)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),

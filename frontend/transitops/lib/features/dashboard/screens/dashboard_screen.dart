@@ -10,12 +10,6 @@ import 'package:transitops/features/authentication/blocs/auth_event.dart';
 import 'package:transitops/features/authentication/blocs/auth_state.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
-const _kBg = Color(0xFF090D16);
-const _kSurface = Color(0xFF111827);
-const _kSurfaceRaised = Color(0xFF1E293B);
-const _kTextPrimary = Color(0xFFF8FAFC);
-const _kTextSecondary = Color(0xFF94A3B8);
-const _kBorder = Color(0xFF1E293B);
 
 // ─── Role Metadata ────────────────────────────────────────────────────────────
 class _RM {
@@ -100,8 +94,8 @@ class _DashboardScreenState extends State<DashboardScreen>
       },
       builder: (ctx, state) {
         if (state is! Authenticated) {
-          return const Scaffold(
-            backgroundColor: _kBg,
+          return Scaffold(
+            backgroundColor: context.kBg,
             body: Center(
               child: CircularProgressIndicator(color: Color(0xFF6366F1)),
             ),
@@ -113,7 +107,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         final meta = _kRM[role]!;
 
         return Scaffold(
-          backgroundColor: _kBg,
+          backgroundColor: context.kBg,
           body: FadeTransition(
             opacity: _fade,
             child: context.isDesktop
@@ -169,7 +163,7 @@ class _MobileDashboard extends StatelessWidget {
           expandedHeight: 160,
           floating: false,
           pinned: true,
-          backgroundColor: _kSurface,
+          backgroundColor: context.kSurface,
           elevation: 0,
           actions: [
             Padding(
@@ -182,7 +176,7 @@ class _MobileDashboard extends StatelessWidget {
                       color: const Color(0xFFF87171).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.logout_rounded,
                       color: Color(0xFFF87171),
                       size: 18,
@@ -200,7 +194,7 @@ class _MobileDashboard extends StatelessWidget {
             background: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [meta.accent.withValues(alpha: 0.15), _kBg],
+                  colors: [meta.accent.withValues(alpha: 0.15), context.kBg],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -245,14 +239,14 @@ class _MobileDashboard extends StatelessWidget {
                             Text(
                               'Welcome back',
                               style: GoogleFonts.outfit(
-                                color: _kTextSecondary,
+                                color: context.kTextSecondary,
                                 fontSize: 12,
                               ),
                             ),
                             Text(
                               email.split('@').first,
                               style: GoogleFonts.outfit(
-                                color: _kTextPrimary,
+                                color: context.kTextPrimary,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.2,
@@ -279,7 +273,7 @@ class _MobileDashboard extends StatelessWidget {
                     gradient: LinearGradient(colors: meta.gradient),
                     borderRadius: BorderRadius.circular(7),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.local_shipping_rounded,
                     color: Colors.white,
                     size: 13,
@@ -289,7 +283,7 @@ class _MobileDashboard extends StatelessWidget {
                 Text(
                   'TransitOps',
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: context.kTextPrimary,
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                   ),
@@ -327,7 +321,7 @@ class _ContentArea extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _sectionTitle('Overview'),
+          _sectionTitle(context, 'Overview'),
           const SizedBox(height: 14),
           _statsGrid(context, cols),
           const SizedBox(height: 28),
@@ -337,10 +331,10 @@ class _ContentArea extends StatelessWidget {
     );
   }
 
-  Widget _sectionTitle(String t) => Text(
+  Widget _sectionTitle(BuildContext context, String t) => Text(
     t,
     style: GoogleFonts.outfit(
-      color: _kTextPrimary,
+      color: context.kTextPrimary,
       fontSize: 16,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.2,
@@ -496,7 +490,7 @@ class _ContentArea extends StatelessWidget {
     switch (role) {
       case UserRole.fleetManager:
         return [
-          _sectionTitle('Quick Actions'),
+          _sectionTitle(ctx, 'Quick Actions'),
           const SizedBox(height: 14),
           if (isWeb)
             Row(
@@ -541,14 +535,14 @@ class _ContentArea extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 28),
-          _sectionTitle('Fleet Status'),
+          _sectionTitle(ctx, 'Fleet Status'),
           const SizedBox(height: 14),
-          if (isWeb) _webFleetTable() else _mobileFleetList(),
+          if (isWeb) _webFleetTable(ctx) else _mobileFleetList(),
         ];
 
       case UserRole.driver:
         return [
-          _sectionTitle("Today's Checklist"),
+          _sectionTitle(ctx, "Today's Checklist"),
           const SizedBox(height: 14),
           const _ChecklistCard(
             items: [
@@ -559,14 +553,14 @@ class _ContentArea extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 28),
-          _sectionTitle('Active Dispatch'),
+          _sectionTitle(ctx, 'Active Dispatch'),
           const SizedBox(height: 14),
           _ActiveTripCard(accent: meta.accent, isWeb: isWeb),
         ];
 
       case UserRole.safetyOfficer:
         return [
-          _sectionTitle('Recent Incidents'),
+          _sectionTitle(ctx, 'Recent Incidents'),
           const SizedBox(height: 14),
           if (isWeb)
             Row(
@@ -615,7 +609,7 @@ class _ContentArea extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 28),
-          _sectionTitle('License Expiry Tracker'),
+          _sectionTitle(ctx, 'License Expiry Tracker'),
           const SizedBox(height: 14),
           _LicenseRow(
             name: 'Rohan Patel',
@@ -636,7 +630,7 @@ class _ContentArea extends StatelessWidget {
 
       case UserRole.financialAnalyst:
         return [
-          _sectionTitle('Expenditure Breakdown'),
+          _sectionTitle(ctx, 'Expenditure Breakdown'),
           const SizedBox(height: 14),
           if (isWeb)
             Row(
@@ -708,7 +702,7 @@ class _ContentArea extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 28),
-          _sectionTitle('Export'),
+          _sectionTitle(ctx, 'Export'),
           const SizedBox(height: 14),
           _ActionCard(
             icon: Icons.download_for_offline_rounded,
@@ -722,7 +716,7 @@ class _ContentArea extends StatelessWidget {
   }
 
   // ─── Fleet table for web ────────────────────────────────────────────────────
-  Widget _webFleetTable() {
+  Widget _webFleetTable(BuildContext context) {
     final rows = [
       ('GJ-05-AB-1234', 'Truck', 'On Trip', const Color(0xFF10B981)),
       ('MH-12-CD-5678', 'Van', 'Available', const Color(0xFF6366F1)),
@@ -731,31 +725,31 @@ class _ContentArea extends StatelessWidget {
     ];
     return Container(
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: context.kBorder),
       ),
       child: Column(
         children: [
           // Header row
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: _kBorder)),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: context.kBorder)),
             ),
             child: Row(
               children: [
-                _th('Registration', flex: 3),
-                _th('Type', flex: 2),
-                _th('Status', flex: 2),
+                _th(context, 'Registration', flex: 3),
+                _th(context, 'Type', flex: 2),
+                _th(context, 'Status', flex: 2),
               ],
             ),
           ),
           ...rows.map(
             (row) => Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: _kBorder)),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: context.kBorder)),
               ),
               child: Row(
                 children: [
@@ -763,16 +757,16 @@ class _ContentArea extends StatelessWidget {
                     flex: 3,
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.directions_car_rounded,
-                          color: _kTextSecondary,
+                          color: context.kTextSecondary,
                           size: 16,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           row.$1,
                           style: GoogleFonts.outfit(
-                            color: _kTextPrimary,
+                            color: context.kTextPrimary,
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
                           ),
@@ -785,7 +779,7 @@ class _ContentArea extends StatelessWidget {
                     child: Text(
                       row.$2,
                       style: GoogleFonts.outfit(
-                        color: _kTextSecondary,
+                        color: context.kTextSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -820,12 +814,12 @@ class _ContentArea extends StatelessWidget {
     );
   }
 
-  Widget _th(String label, {int flex = 1}) => Expanded(
+  Widget _th(BuildContext context, String label, {int flex = 1}) => Expanded(
     flex: flex,
     child: Text(
       label,
       style: GoogleFonts.outfit(
-        color: _kTextSecondary,
+        color: context.kTextSecondary,
         fontSize: 11,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.4,
@@ -902,9 +896,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: context.kBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -924,7 +918,7 @@ class _StatCard extends StatelessWidget {
               ),
               Text(
                 stat.hint,
-                style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 10),
+                style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 10),
               ),
             ],
           ),
@@ -932,7 +926,7 @@ class _StatCard extends StatelessWidget {
           Text(
             stat.value,
             style: GoogleFonts.outfit(
-              color: _kTextPrimary,
+              color: context.kTextPrimary,
               fontSize: 20,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
@@ -940,7 +934,7 @@ class _StatCard extends StatelessWidget {
           ),
           Text(
             stat.label,
-            style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 11),
+            style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 11),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -981,10 +975,10 @@ class _ActionCardState extends State<_ActionCard> {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _hover ? widget.accent.withValues(alpha: 0.07) : _kSurface,
+            color: _hover ? widget.accent.withValues(alpha: 0.07) : context.kSurface,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: _hover ? widget.accent.withValues(alpha: 0.35) : _kBorder,
+              color: _hover ? widget.accent.withValues(alpha: 0.35) : context.kBorder,
             ),
           ),
           child: Row(
@@ -1006,7 +1000,7 @@ class _ActionCardState extends State<_ActionCard> {
                     Text(
                       widget.title,
                       style: GoogleFonts.outfit(
-                        color: _kTextPrimary,
+                        color: context.kTextPrimary,
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                       ),
@@ -1015,7 +1009,7 @@ class _ActionCardState extends State<_ActionCard> {
                     Text(
                       widget.desc,
                       style: GoogleFonts.outfit(
-                        color: _kTextSecondary,
+                        color: context.kTextSecondary,
                         fontSize: 11,
                       ),
                       maxLines: 2,
@@ -1026,7 +1020,7 @@ class _ActionCardState extends State<_ActionCard> {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: _hover ? widget.accent : _kTextSecondary,
+                color: _hover ? widget.accent : context.kTextSecondary,
                 size: 20,
               ),
             ],
@@ -1052,15 +1046,15 @@ class _VehicleStatusRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: context.kBorder),
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.directions_car_rounded,
-            color: _kTextSecondary,
+            color: context.kTextSecondary,
             size: 18,
           ),
           const SizedBox(width: 12),
@@ -1068,7 +1062,7 @@ class _VehicleStatusRow extends StatelessWidget {
             child: Text(
               plate,
               style: GoogleFonts.outfit(
-                color: _kTextPrimary,
+                color: context.kTextPrimary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
@@ -1110,9 +1104,9 @@ class _ChecklistCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: context.kBorder),
       ),
       child: Column(
         children: items
@@ -1127,7 +1121,7 @@ class _ChecklistCard extends StatelessWidget {
                           : Icons.radio_button_unchecked_rounded,
                       color: item.done
                           ? const Color(0xFF10B981)
-                          : _kTextSecondary,
+                          : context.kTextSecondary,
                       size: 20,
                     ),
                     const SizedBox(width: 12),
@@ -1135,12 +1129,12 @@ class _ChecklistCard extends StatelessWidget {
                       child: Text(
                         item.label,
                         style: GoogleFonts.outfit(
-                          color: item.done ? _kTextSecondary : _kTextPrimary,
+                          color: item.done ? context.kTextSecondary : context.kTextPrimary,
                           fontSize: 13,
                           decoration: item.done
                               ? TextDecoration.lineThrough
                               : null,
-                          decorationColor: _kTextSecondary,
+                          decorationColor: context.kTextSecondary,
                         ),
                       ),
                     ),
@@ -1171,9 +1165,9 @@ class _ActiveTripCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: context.kBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1184,7 +1178,7 @@ class _ActiveTripCard extends StatelessWidget {
               Text(
                 'Trip #1204',
                 style: GoogleFonts.outfit(
-                  color: _kTextPrimary,
+                  color: context.kTextPrimary,
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
                 ),
@@ -1207,7 +1201,7 @@ class _ActiveTripCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          Divider(color: _kBorder, height: 1),
+          Divider(color: context.kBorder, height: 1),
           const SizedBox(height: 14),
           if (isWeb)
             GridView.count(
@@ -1243,17 +1237,17 @@ class _TripInfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: _kTextSecondary, size: 15),
+        Icon(icon, color: context.kTextSecondary, size: 15),
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 12),
+          style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 12),
         ),
         Expanded(
           child: Text(
             value,
             style: GoogleFonts.outfit(
-              color: _kTextPrimary,
+              color: context.kTextPrimary,
               fontWeight: FontWeight.w600,
               fontSize: 12,
             ),
@@ -1280,7 +1274,7 @@ class _IncidentCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: accent.withValues(alpha: 0.2)),
       ),
@@ -1307,7 +1301,7 @@ class _IncidentCard extends StatelessWidget {
                       child: Text(
                         title,
                         style: GoogleFonts.outfit(
-                          color: _kTextPrimary,
+                          color: context.kTextPrimary,
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
@@ -1337,7 +1331,7 @@ class _IncidentCard extends StatelessWidget {
                 Text(
                   desc,
                   style: GoogleFonts.outfit(
-                    color: _kTextSecondary,
+                    color: context.kTextSecondary,
                     fontSize: 12,
                     height: 1.4,
                   ),
@@ -1346,7 +1340,7 @@ class _IncidentCard extends StatelessWidget {
                 Text(
                   time,
                   style: GoogleFonts.outfit(
-                    color: _kTextSecondary.withValues(alpha: 0.55),
+                    color: context.kTextSecondary.withValues(alpha: 0.55),
                     fontSize: 10,
                   ),
                 ),
@@ -1374,7 +1368,7 @@ class _LicenseRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
@@ -1389,7 +1383,7 @@ class _LicenseRow extends StatelessWidget {
                 Text(
                   name,
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: context.kTextPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
@@ -1401,7 +1395,7 @@ class _LicenseRow extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: _kTextSecondary, size: 18),
+          Icon(Icons.chevron_right_rounded, color: context.kTextSecondary, size: 18),
         ],
       ),
     );
@@ -1424,9 +1418,9 @@ class _ExpenseRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: context.kBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1436,12 +1430,12 @@ class _ExpenseRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 12),
+                style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 12),
               ),
               Text(
                 amount,
                 style: GoogleFonts.outfit(
-                  color: _kTextPrimary,
+                  color: context.kTextPrimary,
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
                 ),
@@ -1454,7 +1448,7 @@ class _ExpenseRow extends StatelessWidget {
             child: LinearProgressIndicator(
               value: pct,
               minHeight: 4,
-              backgroundColor: _kSurfaceRaised,
+              backgroundColor: context.kSurfaceRaised,
               valueColor: AlwaysStoppedAnimation<Color>(accent),
             ),
           ),

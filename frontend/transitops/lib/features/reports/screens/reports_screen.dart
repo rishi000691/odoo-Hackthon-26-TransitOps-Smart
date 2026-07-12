@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:transitops/core/extensions/context_extension.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -11,12 +12,6 @@ import 'package:transitops/features/reports/blocs/report_state.dart';
 import 'package:transitops/core/widgets/app_dropdown_field.dart';
 
 // Design system tokens matching the shell
-const _kBg = Color(0xFF090D16);
-const _kSurface = Color(0xFF111827);
-const _kSurfaceRaised = Color(0xFF1E293B);
-const _kTextPrimary = Color(0xFFF8FAFC);
-const _kTextSecondary = Color(0xFF94A3B8);
-const _kBorder = Color(0xFF1E293B);
 const _kAccent = Color(0xFFA855F7); // Purple accent   for Reports
 
 class ReportsScreen extends StatefulWidget {
@@ -48,7 +43,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
     if (!isAuthorized) {
       return Scaffold(
-        backgroundColor: _kBg,
+        backgroundColor: context.kBg,
         body: Center(
           child: Text(
             'Access denied. Only Fleet Managers or Financial Analysts are authorized to view reports.',
@@ -63,7 +58,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: context.kBg,
       body: BlocListener<ReportBloc, ReportState>(
         listener: (ctx, state) {
           if (state is ReportExportSuccess) {
@@ -87,7 +82,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   children: [
                     Text(
                       'Failed to load report data',
-                      style: GoogleFonts.outfit(color: _kTextSecondary),
+                      style: GoogleFonts.outfit(color: context.kTextSecondary),
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton(
@@ -126,7 +121,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   Text(
                     'Dashboard KPIs',
                     style: GoogleFonts.outfit(
-                      color: _kTextPrimary,
+                      color: context.kTextPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -170,7 +165,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   Text(
                     'Vehicle ROI Report',
                     style: GoogleFonts.outfit(
-                      color: _kTextPrimary,
+                      color: context.kTextPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -243,9 +238,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _kSurface,
+            color: context.kSurface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: _kBorder),
+            border: Border.all(color: context.kBorder),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,7 +253,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   Text(
                     'Metric',
                     style: GoogleFonts.outfit(
-                      color: _kTextSecondary,
+                      color: context.kTextSecondary,
                       fontSize: 10,
                     ),
                   ),
@@ -268,14 +263,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
               Text(
                 item.value,
                 style: GoogleFonts.outfit(
-                  color: _kTextPrimary,
+                  color: context.kTextPrimary,
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               Text(
                 item.label,
-                style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 11),
+                style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 11),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -290,9 +285,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: context.kBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -300,7 +295,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           Text(
             'Spreadsheet Exporter',
             style: GoogleFonts.outfit(
-              color: _kTextPrimary,
+              color: context.kTextPrimary,
               fontWeight: FontWeight.bold,
               fontSize: 15,
             ),
@@ -308,7 +303,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           const SizedBox(height: 4),
           Text(
             'Download fleet logs directly as .CSV files',
-            style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 12),
+            style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 12),
           ),
           const SizedBox(height: 20),
           AppDropdownField<String>(
@@ -366,9 +361,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: context.kBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -376,7 +371,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           Text(
             'Expenses Breakdown',
             style: GoogleFonts.outfit(
-              color: _kTextPrimary,
+              color: context.kTextPrimary,
               fontWeight: FontWeight.bold,
               fontSize: 15,
             ),
@@ -384,7 +379,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           const SizedBox(height: 4),
           Text(
             'Fuel vs Maintenance Costs comparison',
-            style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 12),
+            style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 12),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -451,7 +446,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         const SizedBox(width: 6),
         Text(
           label,
-          style: GoogleFonts.outfit(color: _kTextSecondary, fontSize: 12),
+          style: GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 12),
         ),
       ],
     );
@@ -460,23 +455,23 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildRoiTable(List<Map<String, dynamic>> roiList) {
     return Container(
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: context.kBorder),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
-            headingRowColor: WidgetStateProperty.all(_kSurfaceRaised),
-            dataRowColor: WidgetStateProperty.all(_kSurface),
+            headingRowColor: WidgetStateProperty.all(context.kSurfaceRaised),
+            dataRowColor: WidgetStateProperty.all(context.kSurface),
             columns: [
               DataColumn(
                 label: Text(
                   'Registration',
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: context.kTextPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -485,7 +480,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 label: Text(
                   'Acquisition Cost',
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: context.kTextPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -494,7 +489,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 label: Text(
                   'Revenue',
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: context.kTextPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -503,7 +498,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 label: Text(
                   'Maintenance Cost',
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: context.kTextPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -512,7 +507,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 label: Text(
                   'Fuel Cost',
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: context.kTextPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -521,7 +516,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 label: Text(
                   'Net ROI (%)',
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: context.kTextPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -541,7 +536,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     Text(
                       registration,
                       style: GoogleFonts.outfit(
-                        color: _kTextPrimary,
+                        color: context.kTextPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -549,7 +544,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   DataCell(
                     Text(
                       '\$$cost',
-                      style: GoogleFonts.outfit(color: _kTextSecondary),
+                      style: GoogleFonts.outfit(color: context.kTextSecondary),
                     ),
                   ),
                   DataCell(
@@ -564,13 +559,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   DataCell(
                     Text(
                       '\$$maint',
-                      style: GoogleFonts.outfit(color: _kTextSecondary),
+                      style: GoogleFonts.outfit(color: context.kTextSecondary),
                     ),
                   ),
                   DataCell(
                     Text(
                       '\$$fuel',
-                      style: GoogleFonts.outfit(color: _kTextSecondary),
+                      style: GoogleFonts.outfit(color: context.kTextSecondary),
                     ),
                   ),
                   DataCell(
@@ -596,7 +591,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          backgroundColor: _kSurface,
+          backgroundColor: context.kSurface,
           title: Row(
             children: [
               const Icon(Icons.check_circle_outline, color: Colors.green),
@@ -604,7 +599,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               Text(
                 'CSV Report Exported',
                 style: GoogleFonts.outfit(
-                  color: _kTextPrimary,
+                  color: context.kTextPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -617,7 +612,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               Text(
                 'Successfully compiled spreadsheet for category: ${type.toUpperCase()}',
                 style: GoogleFonts.outfit(
-                  color: _kTextPrimary,
+                  color: context.kTextPrimary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -626,16 +621,16 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 height: 180,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _kBg,
+                  color: context.kBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: SingleChildScrollView(
                   child: Text(
                     content.isEmpty ? '(Empty spreadsheet dataset)' : content,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Courier',
                       fontSize: 11,
-                      color: _kTextSecondary,
+                      color: context.kTextSecondary,
                     ),
                   ),
                 ),

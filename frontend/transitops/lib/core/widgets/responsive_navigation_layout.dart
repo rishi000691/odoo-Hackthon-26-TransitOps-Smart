@@ -5,18 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:transitops/core/constants/enums.dart';
 import 'package:transitops/core/extensions/context_extension.dart';
 import 'package:transitops/core/routes/app_router.dart';
-import 'package:transitops/core/theme/app_theme.dart';
+import 'package:transitops/core/theme/theme_cubit.dart';
 import 'package:transitops/features/authentication/blocs/auth_bloc.dart';
 import 'package:transitops/features/authentication/blocs/auth_event.dart';
 import 'package:transitops/features/authentication/blocs/auth_state.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
-const _kBg = Color(0xFF090D16);
-const _kSurface = Color(0xFF111827);
-const _kSurfaceRaised = Color(0xFF1E293B);
-const _kTextPrimary = Color(0xFFF8FAFC);
-const _kTextSecondary = Color(0xFF94A3B8);
-const _kBorder = Color(0xFF1E293B);
 
 // ─── Role Metadata ────────────────────────────────────────────────────────────
 class _RM {
@@ -183,9 +177,9 @@ class ResponsiveNavigationLayout extends StatelessWidget {
       },
       builder: (context, state) {
         if (state is! Authenticated) {
-          return const Scaffold(
-            backgroundColor: _kBg,
-            body: Center(
+          return Scaffold(
+            backgroundColor: context.kBg,
+            body: const Center(
               child: CircularProgressIndicator(color: Color(0xFF6366F1)),
             ),
           );
@@ -207,10 +201,20 @@ class ResponsiveNavigationLayout extends StatelessWidget {
 
         if (!context.isDesktop) {
           return Scaffold(
-            backgroundColor: _kBg,
-            body: child,
+            backgroundColor: context.kBg,
+            body: Stack(
+              children: [
+                child,
+                // Theme toggle — top-right corner on mobile
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 8,
+                  right: 12,
+                  child: _ThemeToggleButton(),
+                ),
+              ],
+            ),
             bottomNavigationBar: NavigationBar(
-              backgroundColor: _kSurface,
+              backgroundColor: context.kSurface,
               indicatorColor: meta.accent.withValues(alpha: 0.12),
               selectedIndex: activeIndex,
               onDestinationSelected: (idx) {
@@ -231,7 +235,7 @@ class ResponsiveNavigationLayout extends StatelessWidget {
         }
 
         return Scaffold(
-          backgroundColor: _kBg,
+          backgroundColor: context.kBg,
           body: Row(
             children: [
               _Sidebar(
@@ -248,9 +252,7 @@ class ResponsiveNavigationLayout extends StatelessWidget {
                       meta: meta,
                       title: _getTitleForPath(currentPath),
                     ),
-                    Expanded(
-                      child: child,
-                    ),
+                    Expanded(child: child),
                   ],
                 ),
               ),
@@ -280,15 +282,18 @@ class _Sidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 240,
-      color: _kSurface,
+      color: context.kSurface,
       child: Column(
         children: [
           // Brand
           Container(
             height: 64,
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: _kBorder)),
+            decoration: BoxDecoration(
+              color: context.kSurface,
+              border: Border(
+                bottom: BorderSide(color: context.kBorder),
+              ),
             ),
             child: Row(
               children: [
@@ -309,7 +314,7 @@ class _Sidebar extends StatelessWidget {
                 Text(
                   'TransitOps',
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: context.kTextPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
@@ -329,7 +334,7 @@ class _Sidebar extends StatelessWidget {
                     child: Text(
                       'MENU',
                       style: GoogleFonts.outfit(
-                        color: _kTextSecondary,
+                        color: context.kTextSecondary,
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.0,
@@ -351,8 +356,8 @@ class _Sidebar extends StatelessWidget {
           // User card at bottom
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: _kBorder)),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: context.kBorder)),
             ),
             child: Row(
               children: [
@@ -382,7 +387,7 @@ class _Sidebar extends StatelessWidget {
                       Text(
                         email.split('@').first,
                         style: GoogleFonts.outfit(
-                          color: _kTextPrimary,
+                          color: context.kTextPrimary,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
@@ -392,7 +397,7 @@ class _Sidebar extends StatelessWidget {
                       Text(
                         email,
                         style: GoogleFonts.outfit(
-                          color: _kTextSecondary,
+                          color: context.kTextSecondary,
                           fontSize: 11,
                         ),
                         maxLines: 1,
@@ -456,7 +461,7 @@ class _NavTileState extends State<_NavTile> {
           decoration: BoxDecoration(
             color: widget.active
                 ? widget.accent.withValues(alpha: 0.12)
-                : (_hover ? _kSurfaceRaised : Colors.transparent),
+                : (_hover ? context.kSurfaceRaised : Colors.transparent),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
@@ -466,7 +471,7 @@ class _NavTileState extends State<_NavTile> {
                 size: 18,
                 color: widget.active
                     ? widget.accent
-                    : (_hover ? _kTextPrimary : _kTextSecondary),
+                    : (_hover ? context.kTextPrimary : context.kTextSecondary),
               ),
               const SizedBox(width: 12),
               Text(
@@ -474,7 +479,7 @@ class _NavTileState extends State<_NavTile> {
                 style: GoogleFonts.outfit(
                   color: widget.active
                       ? widget.accent
-                      : (_hover ? _kTextPrimary : _kTextSecondary),
+                      : (_hover ? context.kTextPrimary : context.kTextSecondary),
                   fontSize: 14,
                   fontWeight: widget.active ? FontWeight.w700 : FontWeight.w500,
                 ),
@@ -504,16 +509,16 @@ class _WebTopBar extends StatelessWidget {
     return Container(
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: 28),
-      decoration: const BoxDecoration(
-        color: _kSurface,
-        border: Border(bottom: BorderSide(color: _kBorder)),
+      decoration: BoxDecoration(
+        color: context.kSurface,
+        border: Border(bottom: BorderSide(color: context.kBorder)),
       ),
       child: Row(
         children: [
           Text(
             title,
             style: GoogleFonts.outfit(
-              color: _kTextPrimary,
+              color: context.kTextPrimary,
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),
@@ -545,47 +550,59 @@ class _WebTopBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          // Theme Toggle
-          IconButton(
-            icon: ValueListenableBuilder<ThemeMode>(
-              valueListenable: AppTheme.themeModeNotifier,
-              builder: (context, mode, _) {
-                final isDark = mode == ThemeMode.dark ||
-                    (mode == ThemeMode.system &&
-                        MediaQuery.platformBrightnessOf(context) == Brightness.dark);
-                return Icon(
-                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                  color: _kTextSecondary,
-                  size: 20,
-                );
-              },
-            ),
-            onPressed: () {
-              final mode = AppTheme.themeModeNotifier.value;
-              final isDark = mode == ThemeMode.dark ||
-                  (mode == ThemeMode.system &&
-                      MediaQuery.platformBrightnessOf(context) == Brightness.dark);
-              AppTheme.themeModeNotifier.value =
-                  isDark ? ThemeMode.light : ThemeMode.dark;
-            },
-          ),
-          const SizedBox(width: 12),
+          // Theme toggle button — top-right, matching notification container style
+          _ThemeToggleButton(),
+          const SizedBox(width: 8),
           // Notification placeholder
           Container(
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: _kSurfaceRaised,
+              color: context.kSurfaceRaised,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.notifications_none_rounded,
-              color: _kTextSecondary,
+              color: context.kTextSecondary,
               size: 18,
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── Theme Toggle Button ──────────────────────────────────────────────────────
+/// Sun/moon icon button that reads and toggles [ThemeCubit].
+/// Styled to match the existing [_kSurfaceRaised] container pattern used by the
+/// notification icon in [_WebTopBar] — no new button style introduced.
+class _ThemeToggleButton extends StatelessWidget {
+  const _ThemeToggleButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ThemeCubit, ThemeMode>(
+      builder: (context, themeMode) {
+        // Treat system mode as dark (the Nile-Blue palette is dark-natured).
+        final isDark = themeMode != ThemeMode.light;
+        return GestureDetector(
+          onTap: () => context.read<ThemeCubit>().toggle(),
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: context.kSurfaceRaised,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              color: context.kTextSecondary,
+              size: 18,
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -10,13 +10,7 @@ import 'package:transitops/features/authentication/blocs/auth_event.dart';
 import 'package:transitops/features/authentication/blocs/auth_state.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
-const _kBg = Color(0xFF090D16);
-const _kSurface = Color(0xFF111827);
-const _kSurfaceRaised = Color(0xFF1E293B);
 const _kError = Color(0xFFF87171);
-const _kTextPrimary = Color(0xFFF8FAFC);
-const _kTextSecondary = Color(0xFF94A3B8);
-const _kBorder = Color(0xFF1E293B);
 const _kAccent = Color(0xFF6366F1);
 const _kAccentLight = Color(0xFF818CF8);
 
@@ -172,7 +166,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         _kRoles.firstWhere((r) => r.role == _selectedRole);
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: context.kBg,
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (ctx, state) {
           if (state is Authenticated) ctx.go(AppRouter.dashboardPath);
@@ -280,7 +274,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           style: GoogleFonts.outfit(
             fontSize: 28,
             fontWeight: FontWeight.w800,
-            color: _kTextPrimary,
+            color: context.kTextPrimary,
             letterSpacing: -0.5,
           ),
         ),
@@ -288,7 +282,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         Text(
           'Join the TransitOps fleet portal',
           style: GoogleFonts.outfit(
-              fontSize: 14, color: _kTextSecondary),
+              fontSize: 14, color: context.kTextSecondary),
         ),
       ],
     );
@@ -316,12 +310,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                 const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color:
-                  active ? r.accent.withValues(alpha: 0.10) : _kSurface,
+                  active ? r.accent.withValues(alpha: 0.10) : context.kSurface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: active
                     ? r.accent.withValues(alpha: 0.5)
-                    : _kBorder,
+                    : context.kBorder,
                 width: active ? 1.5 : 1,
               ),
             ),
@@ -344,7 +338,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color:
-                          active ? r.accent : _kTextPrimary,
+                          active ? r.accent : context.kTextPrimary,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -365,9 +359,9 @@ class _RegisterScreenState extends State<RegisterScreen>
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: context.kSurface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: context.kBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.25),
@@ -384,7 +378,7 @@ class _RegisterScreenState extends State<RegisterScreen>
             Text(
               'Create your account',
               style: GoogleFonts.outfit(
-                color: _kTextPrimary,
+                color: context.kTextPrimary,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
@@ -393,7 +387,7 @@ class _RegisterScreenState extends State<RegisterScreen>
             Text(
               'All fields are required',
               style: GoogleFonts.outfit(
-                  fontSize: 12, color: _kTextSecondary),
+                  fontSize: 12, color: context.kTextSecondary),
             ),
             const SizedBox(height: 24),
             // First Name and Last Name layout (Split on desktop/tablet, stacked on mobile)
@@ -502,7 +496,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
                   size: 18,
-                  color: _kTextSecondary,
+                  color: context.kTextSecondary,
                 ),
                 onPressed: () =>
                     setState(() => _obscurePass = !_obscurePass),
@@ -530,7 +524,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
                   size: 18,
-                  color: _kTextSecondary,
+                  color: context.kTextSecondary,
                 ),
                 onPressed: () => setState(
                     () => _obscureConfirm = !_obscureConfirm),
@@ -560,7 +554,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           Text(
             'Already have an account?  ',
             style: GoogleFonts.outfit(
-                fontSize: 13, color: _kTextSecondary),
+                fontSize: 13, color: context.kTextSecondary),
           ),
           GestureDetector(
             onTap: () => context.go(AppRouter.loginPath),
@@ -582,7 +576,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         style: GoogleFonts.outfit(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: _kTextPrimary,
+          color: context.kTextPrimary,
         ),
       );
 
@@ -604,20 +598,20 @@ class _RegisterScreenState extends State<RegisterScreen>
       enabled: enabled,
       obscureText: obscure,
       keyboardType: type,
-      style: GoogleFonts.outfit(color: _kTextPrimary, fontSize: 14),
+      style: GoogleFonts.outfit(color: context.kTextPrimary, fontSize: 14),
       validator: validator,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle:
-            GoogleFonts.outfit(color: _kTextSecondary, fontSize: 14),
-        fillColor: _kSurfaceRaised,
+            GoogleFonts.outfit(color: context.kTextSecondary, fontSize: 14),
+        fillColor: context.kSurfaceRaised,
         filled: true,
         prefixIcon: Padding(
           padding: const EdgeInsets.only(left: 14, right: 10),
           child: Icon(
             icon,
             size: 18,
-            color: focused ? _kAccentLight : _kTextSecondary,
+            color: focused ? _kAccentLight : context.kTextSecondary,
           ),
         ),
         prefixIconConstraints:
@@ -629,7 +623,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
-            color: focused ? _kAccent : _kBorder,
+            color: focused ? _kAccent : context.kBorder,
             width: focused ? 2 : 1,
           ),
         ),
@@ -785,7 +779,7 @@ class _WebRolePanel extends StatelessWidget {
                 Text(
                   'TransitOps',
                   style: GoogleFonts.outfit(
-                    color: _kTextPrimary,
+                    color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                   ),
@@ -796,7 +790,7 @@ class _WebRolePanel extends StatelessWidget {
             Text(
               'Choose your role',
               style: GoogleFonts.outfit(
-                color: _kTextPrimary,
+                color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
@@ -805,7 +799,7 @@ class _WebRolePanel extends StatelessWidget {
             Text(
               'Select the role that matches your position\nin the organisation.',
               style: GoogleFonts.outfit(
-                color: _kTextSecondary,
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 13,
                 height: 1.5,
               ),
@@ -837,7 +831,7 @@ class _WebRolePanel extends StatelessWidget {
                     child: Text(
                       selectedMeta.desc,
                       style: GoogleFonts.outfit(
-                        color: _kTextPrimary,
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 12,
                         height: 1.5,
                       ),
@@ -885,12 +879,12 @@ class _WebRoleCardState extends State<_WebRoleCard> {
           decoration: BoxDecoration(
             color: widget.selected
                 ? r.accent.withValues(alpha: 0.12)
-                : (_hover ? _kSurfaceRaised : _kSurface),
+                : (_hover ? context.kSurfaceRaised : context.kSurface),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: widget.selected
                   ? r.accent.withValues(alpha: 0.5)
-                  : _kBorder,
+                  : context.kBorder,
               width: widget.selected ? 1.5 : 1,
             ),
           ),
@@ -913,7 +907,7 @@ class _WebRoleCardState extends State<_WebRoleCard> {
                     Text(
                       r.label,
                       style: GoogleFonts.outfit(
-                        color: widget.selected ? r.accent : _kTextPrimary,
+                        color: widget.selected ? r.accent : context.kTextPrimary,
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                       ),
@@ -921,7 +915,7 @@ class _WebRoleCardState extends State<_WebRoleCard> {
                     Text(
                       r.desc,
                       style: GoogleFonts.outfit(
-                        color: _kTextSecondary,
+                        color: context.kTextSecondary,
                         fontSize: 11,
                       ),
                       maxLines: 1,
