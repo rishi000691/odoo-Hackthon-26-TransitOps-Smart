@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../storage/secure_storage_service.dart';
+import '../exceptions/exceptions.dart';
 
 class ApiClient {
   final Dio dio;
@@ -51,6 +52,40 @@ class ApiClient {
         },
       ),
     );
+  }
+
+  /// Map DioExceptions to our Failure classes defined in exceptions.dart
+  static Failure handleDioException(DioException e) {
+    if (e.response != null) {
+      final data = e.response!.data;
+      if (data is Map<String, dynamic> && data['error'] != null) {
+        final errorJson = data['error'];
+        final code = errorJson['code'] as String?;
+        final message = errorJson['message'] as String? ?? 'An error occurred';
+
+        if (e.response!.statusCode == 401 || code == 'UNAUTHORIZED') {
+          return AuthFailure(message);
+        } else if (e.response!.statusCode == 403 || code == 'FORBIDDEN') {
+          return AuthFailure(message);
+        }
+
+        return ServerFailure(message, statusCode: e.response!.statusCode);
+      }
+      return ServerFailure(
+        e.response!.statusMessage ?? 'Server returned ${e.response!.statusCode}',
+        statusCode: e.response!.statusCode,
+      );
+    }
+
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.connectionError:
+        return const NetworkFailure('Network connection timed out. Please try again.');
+      default:
+        return UnknownFailure(e.message ?? 'An unknown error occurred');
+    }
   }
 
   /// Internal logic to handle token refreshing

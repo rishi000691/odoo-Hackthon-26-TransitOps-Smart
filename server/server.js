@@ -1,8 +1,8 @@
-require('dotenv').config();
 const app = require('./app');
+const { env } = require('./config/env');
 const { pool } = require('./database/db');
 
-const PORT = process.env.PORT || 5000;
+const PORT = env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
   console.log(`TransitOps API Server is running on port ${PORT}`);
